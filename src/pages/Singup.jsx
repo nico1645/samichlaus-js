@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
-export default function SignupPage() {
+export default function Signup() {
     const navigate = useNavigate();
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
@@ -11,7 +11,7 @@ export default function SignupPage() {
     const [errorBool, setErrorBool] = useState(false);
     const [error, setError] = useState('');
 
-    const onSubmit = async (e) => {
+    const onSignup = (e) => {
         e.preventDefault();
     };
 
@@ -33,7 +33,7 @@ export default function SignupPage() {
                         </h1>
                         <form
                             className="space-y-4 md:space-y-6"
-                            onSubmit={(e) => onSubmit(e)}
+                            onSubmit={(e) => onSignup(e)}
                             action="#"
                         >
                             <div className='flex flex-row'>

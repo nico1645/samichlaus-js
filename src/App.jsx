@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import AuthProvider from "./provider/AuthProvider"
+import Routes from "./routes/Routes"
 
 function App() {
 
   return (
-    <div>
-      test asdflkj
-    </div>
+    <AuthProvider>
+      <Routes />
+    </AuthProvider>
   )
 }
 

@@ -1,15 +1,19 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../provider/AuthProvider';
 
-export default function LoginPage() {
+export default function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorBool, setErrorBool] = useState(false);
     const [error, setError] = useState('');
+    const { setToken } = useAuth();
 
-    const onSubmit = async (e) => {
+    const handleLogin = (e) => {
         e.preventDefault();
+        setToken("this is a test token");
+        navigate("/", { replace: true });
     };
 
     return (
@@ -32,7 +36,7 @@ export default function LoginPage() {
                             Sign in to your account
                         </h1>
                         <form
-                            onSubmit={(e) => onSubmit(e)}
+                            onSubmit={(e) => handleLogin(e)}
                             className="flex flex-col gap-4"
                         >
                             <div>
