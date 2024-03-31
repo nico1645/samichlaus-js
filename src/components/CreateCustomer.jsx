@@ -15,7 +15,6 @@ export default function CreateCustomer({ isOpen, onClose }) {
   const [visitDate, setVisitDate] = useState(new Date());
 
   useEffect(() => {
-    console.log(isOpen)
     if (modal.current) {
       if (isOpen) {
         modal.current.showModal();
@@ -24,6 +23,17 @@ export default function CreateCustomer({ isOpen, onClose }) {
       }
     }
   }, [isOpen]);
+
+  const reset = (e) => {
+    setErrorBool(false);
+    setSelectedAddress(null);
+    setFirstName("");
+    setLastName("");
+    setChildren(0);
+    setSeniors(0);
+    setVisitDate(new Date());
+    setVisitRayon(1);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -46,9 +56,12 @@ export default function CreateCustomer({ isOpen, onClose }) {
           },
         }
       )
-      .then((res) => {})
+      .then((res) => {
+        reset();
+      })
       .catch((err) => {
         if (err.response) {
+          if (err.status === 403) navigate("/logout", { replace: true });
           setError(
             "Error (" + err.response.status + "): " + err.response.data.message
           );
@@ -84,7 +97,7 @@ export default function CreateCustomer({ isOpen, onClose }) {
           label: address.address,
           rayon: address.rayon,
         }));
-        callback(options);
+        callback(options.slice(0, 100));
       })
       .catch((err) => {
         if (err.response) {
@@ -105,13 +118,13 @@ export default function CreateCustomer({ isOpen, onClose }) {
     <dialog
       ref={modal}
       id="openModal"
-      className="modal bg-gray-50 dark:bg-gray-900 p-4 rounded-md shadow-md"
+      className="modal bg-gray-50 rounded-lg shadow dark:border  dark:bg-gray-800 dark:border-gray-700 p-4"
     >
       <div className="flex mb-2 modal-header dark:text-white justify-between flex-row items-center">
         <div className=" text-xl font-bold">Create new Customer</div>
         <span
           onClick={onClose}
-          className="p-2 px-4 align-bottob-2 border-2 border-white hover:cursor-pointer"
+          className="p-2 px-4 align-bottob-2 border-2 border-white hover:cursor-pointer rounded-full"
         >
           X
         </span>
@@ -163,7 +176,12 @@ export default function CreateCustomer({ isOpen, onClose }) {
                 className=" rounded-lg p-1 border-black border-2"
                 min={0}
                 max={100}
-                onChange={(e) => setChildren(parseInt(e.target.value))}
+                onChange={(e) => {
+                  if (e.target.value !== "")
+                    setChildren(parseInt(e.target.value))
+                  else
+                    setChildren(e.target.value)
+                }}
               />
             </div>
             <div className="">
@@ -177,7 +195,12 @@ export default function CreateCustomer({ isOpen, onClose }) {
                 value={seniors}
                 min={0}
                 max={100}
-                onChange={(e) => setSeniors(parseInt(e.target.value))}
+                onChange={(e) => {
+                  if (e.target.value !== "")
+                    setSeniors(parseInt(e.target.value))
+                  else
+                    setSeniors(e.target.value)
+                }}
               />
             </div>
           </div>

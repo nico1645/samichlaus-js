@@ -6,6 +6,9 @@ import Signup from "../pages/Singup";
 import Error from "../pages/Error";
 import Logout from "../pages/Logout";
 import Home from "../pages/Home";
+import Address from "../pages/Address";
+import Customer from "../pages/Customer";
+import CustomerEdit from "../pages/CustomerEdit";
 
 const Routes = () => {
   const { token } = useAuth();
@@ -28,6 +31,18 @@ const Routes = () => {
         {
           path: "/",
           element: <Home />,
+        },
+        {
+          path: "address-import",
+          element: <Address />
+        },
+        {
+          path: "customer-import",
+          element: <Customer />
+        },
+        {
+          path: "customer/:uuid",
+          element: <CustomerEdit />
         },
         {
           path: "/logout",

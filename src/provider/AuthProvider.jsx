@@ -39,6 +39,9 @@ const authReducer = (state, action) => {
   }
 };
 
+if (localStorage.getItem("token"))
+  axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
+
 // Initial state for the authentication context
 const initialData = {
   token: localStorage.getItem("token"),
@@ -48,7 +51,7 @@ const initialData = {
 const AuthProvider = ({ children }) => {
   // Use reducer to manage the authentication state
   const [state, dispatch] = useReducer(authReducer, initialData);
-
+  
   const setToken = (newToken) => {
     dispatch({ type: ACTIONS.setToken, payload: newToken });
   };
