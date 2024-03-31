@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Signup from "../pages/Singup";
 import Error from "../pages/Error";
 import Logout from "../pages/Logout";
+import Home from "../pages/Home";
 
 const Routes = () => {
   const { token } = useAuth();
@@ -14,7 +15,7 @@ const Routes = () => {
     {
       path: "/about",
       element: <div>About Us</div>,
-      errorElement: <Error />
+      errorElement: <Error />,
     },
   ];
 
@@ -26,14 +27,14 @@ const Routes = () => {
       children: [
         {
           path: "/",
-          element: <div>User Home Page</div>,
+          element: <Home />,
         },
         {
           path: "/logout",
           element: <Logout />,
         },
       ],
-      errorElement: <Error />
+      errorElement: <Error />,
     },
   ];
 
@@ -42,18 +43,18 @@ const Routes = () => {
     {
       path: "/login",
       element: <Login />,
-      errorElement: <Error />
+      errorElement: <Error />,
     },
     {
       path: "/signup",
       element: <Signup />,
-      errorElement: <Error />
+      errorElement: <Error />,
     },
     {
       path: "*",
       element: <Error />,
       errorElement: <Error />,
-    }
+    },
   ];
 
   // Combine and conditionally include routes based on authentication status

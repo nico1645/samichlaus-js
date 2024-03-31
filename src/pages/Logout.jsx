@@ -13,7 +13,7 @@ const Logout = () => {
 
   useEffect(() => {
     handleLogout();
-  })
+  });
 
   return <>Logout Page</>;
 };
