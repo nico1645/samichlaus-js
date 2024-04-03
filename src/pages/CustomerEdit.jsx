@@ -39,7 +39,7 @@ export default function CustomerEdit() {
       })
       .catch((err) => {
         if (err.response) {
-          if (err.status === 403) navigate("/logout", { replace: true });
+          if (err.response.status === 403) navigate("/logout", { replace: true });
           setError(
             "Error (" + err.response.status + "): " + err.response.data.message
           );
@@ -78,7 +78,7 @@ export default function CustomerEdit() {
       })
       .catch((err) => {
         if (err.response) {
-          if (err.status === 403) navigate("/logout", { replace: true });
+          if (err.response.status === 403) navigate("/logout", { replace: true });
           setError(
             "Error (" + err.response.status + "): " + err.response.data.message
           );
@@ -117,6 +117,7 @@ export default function CustomerEdit() {
       })
       .catch((err) => {
         if (err.response) {
+          if (err.status === 403) navigate("/logout", { replace: true });
           setError(
             "Error (" + err.response.status + "): " + err.response.data.message
           );

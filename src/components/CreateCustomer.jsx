@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import AsyncSelect from "react-select/async";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateCustomer({ isOpen, onClose }) {
   const modal = useRef(null);
@@ -13,6 +14,7 @@ export default function CreateCustomer({ isOpen, onClose }) {
   const [seniors, setSeniors] = useState(0);
   const [visitRayon, setVisitRayon] = useState(1);
   const [visitDate, setVisitDate] = useState(new Date());
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (modal.current) {
@@ -61,7 +63,7 @@ export default function CreateCustomer({ isOpen, onClose }) {
       })
       .catch((err) => {
         if (err.response) {
-          if (err.status === 403) navigate("/logout", { replace: true });
+          if (err.response.status === 403) navigate("/logout", { replace: true });
           setError(
             "Error (" + err.response.status + "): " + err.response.data.message
           );
@@ -101,6 +103,7 @@ export default function CreateCustomer({ isOpen, onClose }) {
       })
       .catch((err) => {
         if (err.response) {
+          if (err.response.status === 403) navigate("/logout", { replace: true });
           setError(
             "Error (" + err.response.status + "): " + err.response.data.message
           );
