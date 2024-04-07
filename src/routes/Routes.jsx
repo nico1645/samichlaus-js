@@ -9,6 +9,8 @@ import Home from "../pages/Home";
 import Address from "../pages/Address";
 import Customer from "../pages/Customer";
 import CustomerEdit from "../pages/CustomerEdit";
+import Search from "../pages/Search";
+import TourProvider from "../provider/TourProvider";
 
 const Routes = () => {
   const { token } = useAuth();
@@ -30,19 +32,27 @@ const Routes = () => {
       children: [
         {
           path: "/",
-          element: <Home />,
+          element: (
+            <TourProvider>
+              <Home />
+            </TourProvider>
+          ),
         },
         {
           path: "address-import",
-          element: <Address />
+          element: <Address />,
         },
         {
           path: "customer-import",
-          element: <Customer />
+          element: <Customer />,
         },
         {
           path: "customer/:uuid",
-          element: <CustomerEdit />
+          element: <CustomerEdit />,
+        },
+        {
+          path: "customer-search",
+          element: <Search />,
         },
         {
           path: "/logout",

@@ -81,7 +81,7 @@ export default function CreateCustomer({ isOpen, onClose }) {
       .get(
         import.meta.env.VITE_APP_BACKEND_URL +
           "api/v1/address?address=" +
-          encodeURI(inputValue),
+          encodeURI(inputValue) + "&limit=100",
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -99,7 +99,7 @@ export default function CreateCustomer({ isOpen, onClose }) {
           label: address.address,
           rayon: address.rayon,
         }));
-        callback(options.slice(0, 100));
+        callback(options);
       })
       .catch((err) => {
         if (err.response) {
@@ -121,20 +121,20 @@ export default function CreateCustomer({ isOpen, onClose }) {
     <dialog
       ref={modal}
       id="openModal"
-      className="modal bg-gray-50 rounded-lg shadow dark:border  dark:bg-gray-800 dark:border-gray-700 p-4"
+      className="modal bg-gray-50 rounded-lg shadow dark:border  dark:bg-gray-800 dark:border-gray-700 p-4 "
     >
       <div className="flex mb-2 modal-header dark:text-white justify-between flex-row items-center">
         <div className=" text-xl font-bold">Create new Customer</div>
         <span
           onClick={onClose}
-          className="p-2 px-4 align-bottob-2 border-2 border-white hover:cursor-pointer rounded-full"
+          className="p-2 px-4 align-bottob-2 border-2 dark:border-white border-black hover:cursor-pointer rounded-full"
         >
           X
         </span>
       </div>
       <div className="modal-body">
         <form onSubmit={(e) => handleSubmit(e)} className="flex flex-col gap-4">
-          <div className=" flex flex-row gap-6">
+          <div className=" flex flex-col sm:flex-row gap-6">
             <input
               className=" flex-grow rounded-lg p-1 border-black border-2"
               id="firstname"

@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
 import AsyncSelect from "react-select/async";
+import BackButton from "../components/BackButton";
 
 export default function CustomerEdit() {
   const { uuid } = useParams();
@@ -96,7 +97,7 @@ export default function CustomerEdit() {
       .get(
         import.meta.env.VITE_APP_BACKEND_URL +
           "api/v1/address?address=" +
-          encodeURI(inputValue),
+          encodeURI(inputValue) + "&limit=100",
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -113,7 +114,7 @@ export default function CustomerEdit() {
           label: address.address,
           rayon: address.rayon,
         }));
-        callback(options.slice(0, 100));
+        callback(options);
       })
       .catch((err) => {
         if (err.response) {
@@ -133,6 +134,7 @@ export default function CustomerEdit() {
 
   return (
     <div className="flex items-center align-middle h-screen w-screen bg-white dark:bg-gray-900">
+      <BackButton />
       <section className=" bg-gray-50  mx-auto rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700 p-4">
         <div className="flex mb-2 dark:text-white justify-between flex-row items-center">
           <div className=" text-xl font-bold">Update Customer</div>

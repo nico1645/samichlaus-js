@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import BackButton from "../components/BackButton";
 
 export default function Customer() {
   const [file, setFile] = useState("");
@@ -29,7 +30,8 @@ export default function Customer() {
         })
         .catch((err) => {
           if (err.response) {
-            if (err.response.status === 403) navigate("/logout", { replace: true });
+            if (err.response.status === 403)
+              navigate("/logout", { replace: true });
             setError(
               "Error (" +
                 err.response.status +
@@ -50,14 +52,19 @@ export default function Customer() {
   };
 
   return (
-    <section className="bg-white flex align-middle items-center dark:bg-gray-900 h-screen">
-      <div className=" py-8 w-1/2 px-4 mx-auto rounded-lg shadow dark:border  dark:bg-gray-800 dark:border-gray-700 lg:py-16 lg:px-6">
+    <section className="bg-white flex align-middle items-center dark:bg-gray-900 h-screen w-screen">
+      <BackButton />
+      <div className=" py-8 lg:w-1/2 md:w-2/3 sm:w-4/5 px-4 mx-auto rounded-lg shadow dark:border  dark:bg-gray-800 dark:border-gray-700 lg:py-16 lg:px-6">
         <div className="mx-auto text-center">
-          <h1 className="mb-4 text-4xl tracking-tight font-bold  text-black dark:text-white">
+          <h1 className="mb-4 lg:text-4xl tracking-tight md:text-xl text-lg font-bold  text-black dark:text-white">
             Import new Customers
           </h1>
           <form onSubmit={(e) => handleSubmit(e)}>
-            <input type="file" className="dark:text-white text-black" onChange={(e) => setFile(e.target.files[0])} />
+            <input
+              type="file"
+              className="dark:text-white text-black break-words overflow-auto"
+              onChange={(e) => setFile(e.target.files[0])}
+            />
             <button
               type="submit"
               className="mb-2 p-2 rounded-lg bg-primary-600 hover:bg-primary-800 text-white"

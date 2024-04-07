@@ -1,3 +1,5 @@
+import { COLOR_DICT } from './src/constants/Constants';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -12,5 +14,8 @@ export default {
     },
   },
   plugins: [],
+  safelist: [
+    ...Object.values(COLOR_DICT).map((val, i) => `border-${val}-400`)
+  ]
 }
 
