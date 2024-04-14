@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import "leaflet/dist/leaflet.css";
 import {
   COLOR_DICT,
   GROUP_DICT,
@@ -8,11 +7,12 @@ import {
 } from "../constants/Constants";
 import { useTour } from "../provider/TourProvider";
 
-export default function GroupButtons({ group, setGroup }) {
+export default function GroupButtons({ group, setGroup, setDragOverGroup }) {
   const [isDeleteGroupOpen, setIsDeleteGroupOpen] = useState([]);
-  const { visits, addNewGroup, removeGroup, numOfGroups } = useTour();
+  const { tour, addNewGroup, removeGroup, numOfGroups } = useTour();
 
   useEffect(() => {
+    if (numOfGroups > 0)
     setIsDeleteGroupOpen(new Array(numOfGroups).fill(false));
   }, [numOfGroups]);
 
@@ -24,23 +24,41 @@ export default function GroupButtons({ group, setGroup }) {
   };
 
   const handleDeleteGroup = (val) => {
-    if (group === val && numOfGroups - 1 === GROUP_DICT[val])
+    if (GROUP_DICT[group] >= GROUP_DICT[val])
       if (numOfGroups === 1) setGroup("");
-      else setGroup(GROUP_LIST[numOfGroups - 2]);
+      else {
+        setGroup(GROUP_LIST[numOfGroups - 2]);
+        setDragOverGroup(GROUP_LIST[numOfGroups - 2]);
+      }
     removeGroup(val);
     setIsDeleteGroupOpen(new Array(isDeleteGroupOpen.length).fill(false));
   };
 
+  const dragEnter = (_, newGroup) => {
+    setDragOverGroup(newGroup);
+  };
+
   return (
-    <div className="flex flex-row gap-2 items-center justify-center mt-2">
-      {Object.keys(visits).map((val, i) => {
+    <div className="flex flex-row gap-2 items-center justify-center mt-2 max-w-full overflow-auto">
+      {Object.keys(tour).map((val, i) => {
         const color = COLOR_DICT[val];
         if (val !== "Z")
           return (
-            <div className="flex items-center" key={val}>
+            <div
+              className={`flex items-center ${
+                group === val ? " border-[3px]" : ""
+              } rounded-xl border-${
+                color === "black" ? "gray-300" : color + "-200"
+              }`}
+              key={val}
+            >
               <span
-                onClick={() => setGroup(val)}
+                onClick={() => {
+                  setDragOverGroup(val);
+                  setGroup(val);
+                }}
                 onContextMenu={(e) => handleDeleteGroupOpenMenu(e, val)}
+                onDragEnter={(e) => dragEnter(e, val)}
                 className={`flex items-center justify-around select-none h-10 w-10 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-600 text-center hover:cursor-pointer border-2 border-${
                   color === "black" ? "black" : color + "-400"
                 }`}
@@ -56,7 +74,7 @@ export default function GroupButtons({ group, setGroup }) {
                     Remove
                   </button>
                   <button
-                    className="px-4 p-2 rounded-lg bg-gray-200 hover:bg-gray-300  text-black"
+                    className="px-4 p-2 rounded-lg bg-gray-200 hover:bg-gray-300  text-black select-none"
                     onClick={() =>
                       setIsDeleteGroupOpen(
                         new Array(isDeleteGroupOpen.length).fill(false)
@@ -70,12 +88,25 @@ export default function GroupButtons({ group, setGroup }) {
             </div>
           );
       })}
-      {numOfGroups < MAX_GROUPS + 1 ? (
+      {numOfGroups < MAX_GROUPS ? (
         <span
           onClick={addNewGroup}
-          className=" h-10 w-10 text-xl rounded-lg border-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-600 p-1 text-center hover:cursor-pointer"
+          className="flex items-center h-10 w-10 rounded-lg border-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-600 p-1 text-center hover:cursor-pointer"
         >
-          +
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6 dark:stroke-white mx-auto"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
         </span>
       ) : null}
     </div>

@@ -5,16 +5,17 @@ import Select from "react-select";
 import { RAYON_OPTIONS } from "../constants/Constants";
 import { useTour } from "../provider/TourProvider";
 
-export default function Settings({ isOpen, onClose }) {
+export default function Settings({ isOpen, onClose, setGroup }) {
   const modal = useRef(null);
   const [error, setError] = useState("");
   const [errorBool, setErrorBool] = useState(false);
   const [maxSeconds, setMaxSeconds] = useState(10);
   const navigate = useNavigate();
-  const { setRayonYear, year, rayon } = useTour();
-  const [yearOption, setYearOption] = useState({
+  const { year, rayon, setNewTour } = useTour();
+  const [yearOption, setYearOption] = useState([]);
+  const [selectedYearOption, setSelectedYearOption] = useState({
     value: year,
-    label: year.toString(),
+    label: year,
   });
   const [rayonOption, setRayonOption] = useState({
     value: rayon,
@@ -31,10 +32,95 @@ export default function Settings({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    axios
+      .get(import.meta.env.VITE_APP_BACKEND_URL + "api/v1/customer/years", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((res) => {
+        setErrorBool(false);
+        const options = [];
+        if (res.data && res.data.length > 0) {
+          if (year && rayon && res.data.includes(year))
+            handleYearRayonChange(year, rayon);
+
+          setSelectedYearOption({
+            value: res.data[0],
+            label: res.data[0].toString(),
+          });
+          res.data.map((year) =>
+            options.push({
+              value: year,
+              label: year.toString(),
+            })
+          );
+        }
+        setYearOption(options);
+      })
+      .catch((err) => {
+        if (err.response) {
+          if (err.response.status === 403)
+            navigate("/logout", { replace: true });
+          setError(
+            "Error (" + err.response.status + "): " + err.response.data.message
+          );
+        } else if (err.request) {
+          setError("Unexpected Error: " + err.message);
+        } else {
+          setError("Unexpected Error: " + err.message);
+        }
+        setErrorBool(true);
+      });
+  }, []);
+
   const revert = () => {};
   const commit = () => {};
   const handleCalculateTour = () => {
-    
+    if (maxSeconds < 1 || maxSeconds > 900) {
+      setError("Max Seconds should be between 1 and 900");
+      setErrorBool(true);
+      setMaxSeconds(10);
+      return;
+    }
+    axios
+      .post(
+        import.meta.env.VITE_APP_BACKEND_URL +
+          "api/v1/vrp/solve/" +
+          selectedYearOption.value.toString() +
+          "/" +
+          rayonOption.value.toString(),
+        {
+          maxTimeInSeconds: maxSeconds,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => {
+        setErrorBool(false);
+        if (res.data.routes.length - 1 > 0) setGroup("A");
+        else setGroup("");
+        setNewTour(res.data);
+        onClose();
+      })
+      .catch((err) => {
+        if (err.response) {
+          if (err.response.status === 403)
+            navigate("/logout", { replace: true });
+          setError(
+            "Error (" + err.response.status + "): " + err.response.data.message
+          );
+        } else if (err.request) {
+          setError("Unexpected Error: " + err.message);
+        } else {
+          setError("Unexpected Error: " + err.message);
+        }
+        setErrorBool(true);
+      });
   };
   const handleDownloadExcel = () => {
     axios
@@ -51,7 +137,7 @@ export default function Settings({ isOpen, onClose }) {
       )
       .then((res) => {
         var a = window.document.createElement("a");
-        a.href = window.URL.createObjectURL(response.data);
+        a.href = window.URL.createObjectURL(res.data);
         a.download = `Laufliste_${year}.xlsm`;
         document.body.appendChild(a);
         a.click();
@@ -73,10 +159,42 @@ export default function Settings({ isOpen, onClose }) {
       });
   };
 
+  const handleYearRayonChange = (newYear, newRayon) => {
+    axios
+      .get(
+        `${
+          import.meta.env.VITE_APP_BACKEND_URL
+        }api/v1/tour/TST/${newYear}/${newRayon}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => {
+        setErrorBool(false);
+        if (res.data.routes.length - 1 > 0) setGroup("A");
+        else setGroup("");
+        setNewTour(res.data);
+      })
+      .catch((err) => {
+        if (err.response) {
+          if (err.response.status === 403)
+            navigate("/logout", { replace: true });
+          setError(
+            "Error (" + err.response.status + "): " + err.response.data.message
+          );
+        } else if (err.request) {
+          setError("Unexpected Error: " + err.message);
+        } else {
+          setError("Unexpected Error: " + err.message);
+        }
+        setErrorBool(true);
+      });
+  };
+
   const handleClose = () => {
     setErrorBool(false);
-    if (year !== yearOption.value || rayon !== rayonOption.value)
-      setRayonYear(yearOption.value, rayonOption.value);
     onClose();
   };
 
@@ -119,9 +237,12 @@ export default function Settings({ isOpen, onClose }) {
             <div>Year: </div>
             <Select
               className="text-black"
-              value={yearOption}
-              onChange={(selected) => setYearOption(selected)}
-              options={[{ value: 2024, label: "2024" }]}
+              value={selectedYearOption}
+              onChange={(selected) => {
+                setSelectedYearOption(selected);
+                handleYearRayonChange(selected.value, rayonOption.value);
+              }}
+              options={yearOption}
             />
           </div>
           <div className="flex flex-row gap-4 md:gap-8 items-center">
@@ -129,7 +250,10 @@ export default function Settings({ isOpen, onClose }) {
             <Select
               className="text-black"
               value={rayonOption}
-              onChange={(selected) => setRayonOption(selected)}
+              onChange={(selected) => {
+                setRayonOption(selected);
+                handleYearRayonChange(selectedYearOption.value, selected.value);
+              }}
               options={RAYON_OPTIONS}
             />
           </div>
@@ -176,7 +300,7 @@ export default function Settings({ isOpen, onClose }) {
           </div>
         </div>
         {errorBool ? (
-          <div className="w-full rounded-lg p-2 text-white bg-red-500 border-red-600 border-2">
+          <div className="w-full mt-2 rounded-lg p-2 text-white bg-red-500 border-red-600 border-2">
             {error}
           </div>
         ) : null}

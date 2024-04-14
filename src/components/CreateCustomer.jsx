@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import AsyncSelect from "react-select/async";
 import { useNavigate } from "react-router-dom";
+import { useTour } from "../provider/TourProvider";
 
 export default function CreateCustomer({ isOpen, onClose }) {
   const modal = useRef(null);
@@ -13,7 +14,8 @@ export default function CreateCustomer({ isOpen, onClose }) {
   const [children, setChildren] = useState(0);
   const [seniors, setSeniors] = useState(0);
   const [visitRayon, setVisitRayon] = useState(1);
-  const [visitDate, setVisitDate] = useState(new Date());
+  const { year, rayon } = useTour();
+  const [visitYear, setVisitYear] = useState(year);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,23 +35,23 @@ export default function CreateCustomer({ isOpen, onClose }) {
     setLastName("");
     setChildren(0);
     setSeniors(0);
-    setVisitDate(new Date());
+    setVisitYear(year);
     setVisitRayon(1);
+    onClose();
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
       .post(
-        import.meta.env.VITE_APP_BACKEND_URL + "api/v1/customer",
+        import.meta.env.VITE_APP_BACKEND_URL + "api/v1/customer/tour",
         {
           addressId: selectedAddress.value,
           firstName: firstName,
           lastName: lastName,
           children: children,
           seniors: seniors,
-          year: visitDate.getFullYear(),
-          visitDate: visitDate.toISOString().slice(0, 10),
+          year: visitYear,
           visitRayon: visitRayon,
         },
         {
@@ -59,6 +61,8 @@ export default function CreateCustomer({ isOpen, onClose }) {
         }
       )
       .then((res) => {
+        if (visitYear === year && visitRayon === rayon)
+          navigate(0);
         reset();
       })
       .catch((err) => {
@@ -210,15 +214,17 @@ export default function CreateCustomer({ isOpen, onClose }) {
           <div className=" flex flex-row gap-6">
             <div className="flex-grow">
               <label htmlFor="visitDate" className=" dark:text-white mr-2">
-                Visit Date
+                Year
               </label>
               <input
                 id="visitDate"
-                type="Date"
+                type="number"
                 className=" rounded-lg p-1 border-black border-2"
                 required
-                value={visitDate.toISOString().slice(0, 10)}
-                onChange={(e) => setVisitDate(new Date(e.target.value))}
+                min={1700}
+                max={10000}
+                value={visitYear}
+                onChange={(e) => setVisitYear(e.target.value)}
               />
             </div>
             <div className="">

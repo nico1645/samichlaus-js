@@ -12,11 +12,21 @@ export default function CustomerEdit() {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [link, setLink] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [children, setChildren] = useState(0);
   const [seniors, setSeniors] = useState(0);
   const [visitRayon, setVisitRayon] = useState(1);
-  const [visitDate, setVisitDate] = useState(new Date());
+  const [visitYear, setVisitYear] = useState(0);
+  const [visitTime, setVisitTime] = useState('');
   const navigate = useNavigate();
+  
+
+  const openInNewTab = (url) => {
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
+    if (newWindow) newWindow.opener = null
+  }
 
   useEffect(() => {
     axios
@@ -36,11 +46,16 @@ export default function CustomerEdit() {
         setChildren(res.data.children);
         setSeniors(res.data.seniors);
         setVisitRayon(res.data.visitRayon);
-        setVisitDate(new Date(res.data.visitDate));
+        setVisitYear(res.data.year);
+        setLink(res.data.link);
+        setPhone(res.data.phone);
+        setEmail(res.data.email);
+        setVisitTime(res.data.visitTime);
       })
       .catch((err) => {
         if (err.response) {
-          if (err.response.status === 403) navigate("/logout", { replace: true });
+          if (err.response.status === 403)
+            navigate("/logout", { replace: true });
           setError(
             "Error (" + err.response.status + "): " + err.response.data.message
           );
@@ -64,9 +79,12 @@ export default function CustomerEdit() {
           lastName: lastName,
           children: children,
           seniors: seniors,
-          year: visitDate.getFullYear(),
-          visitDate: visitDate.toISOString().slice(0, 10),
+          year: visitYear,
           visitRayon: visitRayon,
+          link: link,
+          phone: phone,
+          email: email,
+          visitTime: visitTime
         },
         {
           headers: {
@@ -79,7 +97,8 @@ export default function CustomerEdit() {
       })
       .catch((err) => {
         if (err.response) {
-          if (err.response.status === 403) navigate("/logout", { replace: true });
+          if (err.response.status === 403)
+            navigate("/logout", { replace: true });
           setError(
             "Error (" + err.response.status + "): " + err.response.data.message
           );
@@ -97,7 +116,8 @@ export default function CustomerEdit() {
       .get(
         import.meta.env.VITE_APP_BACKEND_URL +
           "api/v1/address?address=" +
-          encodeURI(inputValue) + "&limit=100",
+          encodeURI(inputValue) +
+          "&limit=100",
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -136,8 +156,26 @@ export default function CustomerEdit() {
     <div className="flex items-center align-middle h-screen w-screen bg-white dark:bg-gray-900">
       <BackButton />
       <section className=" bg-gray-50  mx-auto rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700 p-4">
-        <div className="flex mb-2 dark:text-white justify-between flex-row items-center">
+        <div className="mb-2 dark:text-white ">
           <div className=" text-xl font-bold">Update Customer</div>
+          {link ? (
+            <div className="absolute translate-x-44 -translate-y-6 hover:cursor-pointer" onClick={() => openInNewTab(link)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="currentColor"
+                className="w-4 h-4 dark:stroke-white"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+                />
+              </svg>
+            </div>
+          ) : null}
         </div>
         <div className="">
           <form
@@ -162,6 +200,30 @@ export default function CustomerEdit() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last Name"
+              />
+            </div>
+            <div className="flex-grow">
+              <input
+                className="w-full rounded-lg p-1 border-black border-2"
+                id="email"
+                type="text"
+                readOnly
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email Address"
+              />
+            </div>
+            <div className="flex grow">
+              <input
+                className="w-full rounded-lg p-1 border-black border-2"
+                id="phone"
+                readOnly
+                type="text"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Phone Number"
               />
             </div>
             <div className=" flex-grow">
@@ -218,15 +280,17 @@ export default function CustomerEdit() {
             <div className=" flex flex-row gap-6">
               <div className="flex-grow">
                 <label htmlFor="visitDate" className=" dark:text-white mr-2">
-                  Visit Date
+                  Year
                 </label>
                 <input
                   id="visitDate"
-                  type="Date"
+                  type="number"
                   className=" rounded-lg p-1 border-black border-2"
                   required
-                  value={visitDate.toISOString().slice(0, 10)}
-                  onChange={(e) => setVisitDate(new Date(e.target.value))}
+                  min={1700}
+                  max={10000}
+                  value={visitYear}
+                  onChange={(e) => setVisitYear(e.target.value)}
                 />
               </div>
               <div className="">
