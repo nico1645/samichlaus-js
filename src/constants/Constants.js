@@ -42,6 +42,10 @@ export const route_comparator = (a, b) => {
   return 0;
 };
 
+export const route_comparator_address = (a, b) => {
+  return a.address.address.localeCompare(b.address.address);
+}
+
 export const parseDate = (utcString) => {
   if (!utcString) return null;
   var dateComponents = utcString.split(/[T:+-]/);

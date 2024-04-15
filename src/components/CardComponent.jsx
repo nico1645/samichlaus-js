@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useTour } from "../provider/TourProvider";
 export default function CardComponent({ customer, index, group, dropItem }) {
   const navigate = useNavigate();
+  const { removeCustomer } = useTour();
 
   const getSeniorChildString = (children, seniors) => {
     if (children === 0 && seniors === 0) {
@@ -15,9 +16,6 @@ export default function CardComponent({ customer, index, group, dropItem }) {
     }
   };
 
-  const deleteCustomer = () => {
-
-  }
 
   return (
     <div className="flex-grow cursor-grab h-[calc(5rem-4px)] m-1 active:cursor-grabbing select-none border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-black shadow-sm">
@@ -54,7 +52,7 @@ export default function CardComponent({ customer, index, group, dropItem }) {
                 className=" cursor-pointer"
                 onClick={() => {
                   if (group === "Z")
-                    deleteCustomer();
+                    removeCustomer(index, customer.customerId);
                   else
                     dropItem(index, -1, group, "Z");
                 }}

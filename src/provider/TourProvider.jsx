@@ -1,6 +1,21 @@
-import axios from "axios";
 import { createContext, useContext, useMemo, useReducer } from "react";
-import { GROUP_DICT, GROUP_LIST, MAX_GROUPS, route_comparator, parseDate } from "../constants/Constants";
+import {
+  GROUP_DICT,
+  GROUP_LIST,
+  MAX_GROUPS,
+  route_comparator,
+  parseDate,
+  route_comparator_address,
+} from "../constants/Constants";
+import {
+  createRoute,
+  deleteCustomer,
+  deleteRoute,
+  putTour,
+  updateManyCustomers,
+  updateManyRoutes,
+  updateRoute,
+} from "../utils/utils";
 
 // Create the authentication context
 const TourContext = createContext();
@@ -12,9 +27,11 @@ const ACTIONS = {
   setRayonYear: "setRayonYear",
   moveItem: "moveItem",
   setNewTour: "setNewTour",
-  setDateTour: "setGroupStartDate",
+  setGroupStartTime: "setGroupStartTime",
+  setTourDate: "setTourDate",
   reverseGroup: "reverseGroup",
-  setSamichlausGroupName: "setSamichlausGroupName"
+  setSamichlausGroupName: "setSamichlausGroupName",
+  removeCustomer: "removeCustomer",
 };
 
 // Reducer function to handle authentication state changes
@@ -23,36 +40,90 @@ const tourReducer = (state, action) => {
     case ACTIONS.addNewGroup:
       if (state.numOfGroups < MAX_GROUPS) {
         const newGroup = GROUP_LIST[state.numOfGroups];
-        if (state.numOfGroups === 0)
+        if (state.numOfGroups === 0) {
+          createRoute(
+            () => {},
+            () => {},
+            {
+              customerStart: "00:00:00",
+              customerEnd: "00:00:00",
+              transport: "foot",
+              samichlaus: "",
+              ruprecht: "",
+              schmutzli: "",
+              engel1: "",
+              engel2: "",
+              group: newGroup,
+              tourId: state.tourId,
+            }
+          );
           return {
             ...state,
             tour: Object.assign({}, state.tour, {
               [newGroup]: {
                 customers: [],
                 customerStart: "00:00:00",
+                customerEnd: "00:00:00",
                 transport: "foot",
               },
             }),
             numOfGroups: state.numOfGroups + 1,
           };
-        else
+        } else {
+          createRoute(
+            () => {},
+            () => {},
+            {
+              customerStart: state.tour["A"].customerStart,
+              customerEnd: state.tour["A"].customerStart,
+              transport: "foot",
+              samichlaus: "",
+              ruprecht: "",
+              schmutzli: "",
+              engel1: "",
+              engel2: "",
+              group: newGroup,
+              tourId: state.tourId,
+            }
+          );
           return {
             ...state,
             tour: Object.assign({}, state.tour, {
               [newGroup]: {
                 customers: [],
                 customerStart: state.tour["A"].customerStart,
+                customerEnd: state.tour["A"].customerStart,
                 transport: "foot",
               },
             }),
             numOfGroups: state.numOfGroups + 1,
           };
+        }
       }
       return state;
     case ACTIONS.removeGroup:
+      const customerUpdateData = [];
+      const routeId = state.tour[action.payload].routeId;
       if (state.numOfGroups === GROUP_DICT[action.payload] + 1) {
         const updatedTour = { ...state.tour };
-        updatedTour["Z"].customers = [...updatedTour["Z"].customers, ...updatedTour[action.payload].customers];
+        updatedTour[action.payload].customers.forEach((customer, index) => {
+          updatedTour["Z"].customers.push(customer);
+          customerUpdateData.push({
+            customerId: customer.customerId,
+            routeId: updatedTour["Z"].routeId,
+          });
+        });
+        updateManyCustomers(
+          () => {
+            deleteRoute(
+              () => {},
+              () => {},
+              routeId
+            );
+          },
+          () => {},
+          customerUpdateData
+        );
         delete updatedTour[action.payload];
         return {
           ...state,
@@ -61,8 +132,14 @@ const tourReducer = (state, action) => {
         };
       } else {
         const updatedTour = { ...state.tour };
-        updatedTour["Z"].customers = [...updatedTour["Z"].customers, ...updatedTour[action.payload].customers];
-
+        const updateRouteData = [];
+        updatedTour[action.payload].customers.forEach((customer, index) => {
+          updatedTour["Z"].customers.push(customer);
+          customerUpdateData.push({
+            customerId: customer.customerId,
+            routeId: updatedTour["Z"].routeId,
+          });
+        });
         for (
           let i = GROUP_DICT[action.payload];
           i < state.numOfGroups - 1;
@@ -71,8 +148,31 @@ const tourReducer = (state, action) => {
           const currentGroup = GROUP_LIST[i];
           const nextGroup = GROUP_LIST[i + 1];
 
+          updateRouteData.push({
+            routeId: updatedTour[nextGroup].routeId,
+            group: currentGroup,
+          });
+
           updatedTour[currentGroup] = state.tour[nextGroup];
         }
+
+        updateManyRoutes(
+          () => {
+            updateManyCustomers(
+              () => {
+                deleteRoute(
+                  () => {},
+                  () => {},
+                  routeId
+                );
+              },
+              () => {},
+              customerUpdateData
+            );
+          },
+          () => {},
+          updateRouteData
+        );
 
         delete updatedTour[GROUP_LIST[state.numOfGroups - 1]];
 
@@ -101,19 +201,23 @@ const tourReducer = (state, action) => {
         numOfGroups: tour.routes.length - 1,
         year: tour.year,
         rayon: tour.rayon,
-        date: tour.date
+        date: tour.date,
+        tourId: tour.tourId,
       };
 
       tour.routes.map((route) => {
         const customers = [];
         route.customers.forEach((c, i) => {
           customers.push(c);
-        })
-        customers.sort(route_comparator);
+        });
+        if (route.group === "Z") customers.sort(route_comparator_address);
+        else customers.sort(route_comparator);
         newState.tour = Object.assign({}, newState.tour, {
           [route.group]: {
+            routeId: route.routeId,
             customers: customers,
             customerStart: route.customerStart,
+            customerEnd: route.customerEnd,
             transport: route.transport,
             samichlaus: route.samichlaus,
             ruprecht: route.ruprecht,
@@ -123,9 +227,16 @@ const tourReducer = (state, action) => {
           },
         });
       });
-      console.log(newState.tour)
 
-      return { ...state, rayon: newState.rayon, year: newState.year, tour: newState.tour, numOfGroups: newState.numOfGroups, date: newState.date };
+      return {
+        ...state,
+        rayon: newState.rayon,
+        year: newState.year,
+        tour: newState.tour,
+        numOfGroups: newState.numOfGroups,
+        date: newState.date,
+        tourId: newState.tourId,
+      };
 
     case ACTIONS.moveItem:
       const fromGroup = action.payload.fromGroup;
@@ -135,37 +246,65 @@ const tourReducer = (state, action) => {
       const newTour = { ...state.tour };
 
       if (fromGroup !== "Z" && fromGroup !== toGroup) {
-          newTour[toGroup].customers.push(state.tour[fromGroup].customers[fromIndex]);
-          newTour[fromGroup].customers.splice(fromIndex, 1);
+        newTour[toGroup].customers.push(
+          state.tour[fromGroup].customers[fromIndex]
+        );
+        newTour[fromGroup].customers.splice(fromIndex, 1);
       } else if (fromGroup === "Z" || fromIndex !== toIndex) {
-          const tmp = newTour[fromGroup].customers.splice(fromIndex, 1);
-          if (newTour[toGroup].customers.length -1 === toIndex)
-            newTour[toGroup].customers.push(tmp[0]);
-          else
-            newTour[toGroup].customers.splice(toIndex, 0, tmp[0]);
+        const tmp = newTour[fromGroup].customers.splice(fromIndex, 1);
+        if (newTour[toGroup].customers.length - 1 === toIndex)
+          newTour[toGroup].customers.push(tmp[0]);
+        else newTour[toGroup].customers.splice(toIndex, 0, tmp[0]);
       } else {
         return state;
       }
+      if (toGroup === "Z")
+        newTour[toGroup].customers.sort(route_comparator_address);
 
       return { ...state, tour: newTour };
-    
-    case ACTIONS.setGroupStartDate:
+
+    case ACTIONS.setGroupStartTime:
       state.tour[action.payload.group].customerStart = action.payload.date;
-      return {...state, tour: {...state.tour}};
+      return { ...state, tour: { ...state.tour } };
+
+    case ACTIONS.setTourDate:
+      putTour(
+        () => {},
+        () => {},
+        { date: action.payload.date },
+        state.tourId
+      );
+      return { ...state, date: action.payload.date };
 
     case ACTIONS.reverseGroup:
-      state.tour[action.payload.group].customers = [...state.tour[action.payload.group].customers.reverse()];
-      return { ...state, tour: { ...state.tour }};
-    
+      state.tour[action.payload.group].customers = [
+        ...state.tour[action.payload.group].customers.reverse(),
+      ];
+      return { ...state, tour: { ...state.tour } };
+
     case ACTIONS.setSamichlausGroupName:
       for (let i = 0; i < state.numOfGroups; i++) {
-        state.tour[GROUP_LIST[i]].samichlaus = action.payload[GROUP_LIST[i]+"samichlaus"];
-        state.tour[GROUP_LIST[i]].ruprecht = action.payload[GROUP_LIST[i]+"ruprecht"];
-        state.tour[GROUP_LIST[i]].schmutzli = action.payload[GROUP_LIST[i]+"schmutzli"];
-        state.tour[GROUP_LIST[i]].engel1 = action.payload[GROUP_LIST[i]+"engel1"];
-        state.tour[GROUP_LIST[i]].engel2 = action.payload[GROUP_LIST[i]+"engel2"];
+        state.tour[GROUP_LIST[i]].samichlaus =
+          action.payload[GROUP_LIST[i] + "samichlaus"];
+        state.tour[GROUP_LIST[i]].ruprecht =
+          action.payload[GROUP_LIST[i] + "ruprecht"];
+        state.tour[GROUP_LIST[i]].schmutzli =
+          action.payload[GROUP_LIST[i] + "schmutzli"];
+        state.tour[GROUP_LIST[i]].engel1 =
+          action.payload[GROUP_LIST[i] + "engel1"];
+        state.tour[GROUP_LIST[i]].engel2 =
+          action.payload[GROUP_LIST[i] + "engel2"];
       }
-      return {...state, tour: { ...state.tour }};
+      return { ...state, tour: { ...state.tour } };
+
+    case ACTIONS.removeCustomer:
+      deleteCustomer(
+        () => {},
+        () => {},
+        action.payload.uuid
+      );
+      state.tour["Z"].customers.splice(action.payload.index, 1);
+      return { ...state, tour: { ...state.tour } };
 
     default:
       console.error(
@@ -183,7 +322,8 @@ const initialData = {
   year: localStorage.getItem("year")
     ? parseInt(localStorage.getItem("year"))
     : new Date().getFullYear(),
-  date: new Date().toLocaleDateString()
+  date: new Date().toLocaleDateString(),
+  tourId: "",
 };
 
 const TourProvider = ({ children }) => {
@@ -205,16 +345,23 @@ const TourProvider = ({ children }) => {
   };
 
   const reverseGroup = (group) => {
-    dispatch({ type: ACTIONS.reverseGroup, payload: {group: group} })
-  }
+    dispatch({ type: ACTIONS.reverseGroup, payload: { group: group } });
+  };
 
   const setNewTour = (tour) => {
     dispatch({ type: ACTIONS.setNewTour, payload: { tour: tour } });
   };
 
-  const setGroupStartDate = (group, date) => {
-    dispatch({type: ACTIONS.setGroupStartDate, payload: {group: group, date: date}})
-  } 
+  const setGroupStartTime = (group, date) => {
+    dispatch({
+      type: ACTIONS.setGroupStartTime,
+      payload: { group: group, date: date },
+    });
+  };
+
+  const setTourDate = (date) => {
+    dispatch({ type: ACTIONS.setTourDate, payload: { date: date } });
+  };
 
   const moveItem = (fromIndex, toIndex, fromGroup, toGroup) => {
     dispatch({
@@ -229,9 +376,15 @@ const TourProvider = ({ children }) => {
   };
 
   const setSamichlausGroupName = (values) => {
-    dispatch({ type: ACTIONS.setSamichlausGroupName, payload: values})
+    dispatch({ type: ACTIONS.setSamichlausGroupName, payload: values });
+  };
 
-  }
+  const removeCustomer = (index, uuid) => {
+    dispatch({
+      type: ACTIONS.removeCustomer,
+      payload: { index: index, uuid: uuid },
+    });
+  };
 
   // Memoized value of the tour context
   const contextValue = useMemo(
@@ -242,9 +395,11 @@ const TourProvider = ({ children }) => {
       setRayonYear,
       moveItem,
       setNewTour,
-      setGroupStartDate,
+      setGroupStartTime,
       reverseGroup,
       setSamichlausGroupName,
+      setTourDate,
+      removeCustomer,
     }),
     [state]
   );

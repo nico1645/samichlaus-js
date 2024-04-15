@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import AsyncSelect from "react-select/async";
 import { useNavigate } from "react-router-dom";
 import { useTour } from "../provider/TourProvider";
+import { getAddressesContaining, postCreateCustomer } from "../utils/utils";
 
 export default function CreateCustomer({ isOpen, onClose }) {
   const modal = useRef(null);
@@ -40,85 +40,55 @@ export default function CreateCustomer({ isOpen, onClose }) {
     onClose();
   };
 
+  const errCallback = (err) => {
+    if (err.response) {
+      if (err.response.status === 403) navigate("/logout", { replace: true });
+      setError(
+        "Error (" + err.response.status + "): " + err.response.data.message
+      );
+    } else if (err.request) {
+      setError("Unexpected Error: " + err.message);
+    } else {
+      setError("Unexpected Error: " + err.message);
+    }
+    setErrorBool(true);
+  };
+
+  const createCustomerSuccCallback = () => {
+    if (visitYear === year && visitRayon === rayon) navigate(0);
+    reset();
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .post(
-        import.meta.env.VITE_APP_BACKEND_URL + "api/v1/customer/tour",
-        {
-          addressId: selectedAddress.value,
-          firstName: firstName,
-          lastName: lastName,
-          children: children,
-          seniors: seniors,
-          year: visitYear,
-          visitRayon: visitRayon,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((res) => {
-        if (visitYear === year && visitRayon === rayon)
-          navigate(0);
-        reset();
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.response.status === 403) navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-      });
+    const data = {
+      addressId: selectedAddress.value,
+      firstName: firstName,
+      lastName: lastName,
+      children: children,
+      seniors: seniors,
+      year: visitYear,
+      visitRayon: visitRayon,
+    };
+    postCreateCustomer(createCustomerSuccCallback, errCallback, data);
+  };
+
+  const getAddressesSuccCallback = (res, callback) => {
+    setErrorBool(false);
+    if (res.status === 204) {
+      callback([]);
+      return;
+    }
+    const options = res.data.map((address) => ({
+      value: address.addressId,
+      label: address.address,
+      rayon: address.rayon,
+    }));
+    callback(options);
   };
 
   const loadOptions = (inputValue, callback) => {
-    axios
-      .get(
-        import.meta.env.VITE_APP_BACKEND_URL +
-          "api/v1/address?address=" +
-          encodeURI(inputValue) + "&limit=100",
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      )
-      .then((res) => {
-        setErrorBool(false);
-        if (res.status === 204) {
-          callback([]);
-          return;
-        }
-        const options = res.data.map((address) => ({
-          value: address.addressId,
-          label: address.address,
-          rayon: address.rayon,
-        }));
-        callback(options);
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.response.status === 403) navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-        callback([]);
-      });
+    getAddressesContaining(inputValue, callback, getAddressesSuccCallback, errCallback);
   };
 
   return (
@@ -185,9 +155,8 @@ export default function CreateCustomer({ isOpen, onClose }) {
                 max={100}
                 onChange={(e) => {
                   if (e.target.value !== "")
-                    setChildren(parseInt(e.target.value))
-                  else
-                    setChildren(e.target.value)
+                    setChildren(parseInt(e.target.value));
+                  else setChildren(e.target.value);
                 }}
               />
             </div>
@@ -204,9 +173,8 @@ export default function CreateCustomer({ isOpen, onClose }) {
                 max={100}
                 onChange={(e) => {
                   if (e.target.value !== "")
-                    setSeniors(parseInt(e.target.value))
-                  else
-                    setSeniors(e.target.value)
+                    setSeniors(parseInt(e.target.value));
+                  else setSeniors(e.target.value);
                 }}
               />
             </div>

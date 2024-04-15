@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import { RAYON_OPTIONS } from "../constants/Constants";
 import { useTour } from "../provider/TourProvider";
+import { getExcel, getTour, getYears, postCalculateTour } from "../utils/utils";
 
 export default function Settings({ isOpen, onClose, setGroup }) {
   const modal = useRef(null);
@@ -22,6 +22,20 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     label: "Rayon " + "I".repeat(rayon),
   });
 
+  const errCallback = (err) => {
+    if (err.response) {
+      if (err.response.status === 403) navigate("/logout", { replace: true });
+      setError(
+        "Error (" + err.response.status + "): " + err.response.data.message
+      );
+    } else if (err.request) {
+      setError("Unexpected Error: " + err.message);
+    } else {
+      setError("Unexpected Error: " + err.message);
+    }
+    setErrorBool(true);
+  };
+
   useEffect(() => {
     if (modal.current) {
       if (isOpen) {
@@ -33,50 +47,41 @@ export default function Settings({ isOpen, onClose, setGroup }) {
   }, [isOpen]);
 
   useEffect(() => {
-    axios
-      .get(import.meta.env.VITE_APP_BACKEND_URL + "api/v1/customer/years", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then((res) => {
-        setErrorBool(false);
-        const options = [];
-        if (res.data && res.data.length > 0) {
-          if (year && rayon && res.data.includes(year))
-            handleYearRayonChange(year, rayon);
-
-          setSelectedYearOption({
-            value: res.data[0],
-            label: res.data[0].toString(),
-          });
-          res.data.map((year) =>
-            options.push({
-              value: year,
-              label: year.toString(),
-            })
-          );
-        }
-        setYearOption(options);
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.response.status === 403)
-            navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-      });
+    getYears(getYearsSuccCallback, errCallback);
   }, []);
+
+  const getYearsSuccCallback = (res) => {
+    setErrorBool(false);
+    const options = [];
+    if (res.data && res.data.length > 0) {
+      if (year && rayon && res.data.includes(year))
+        handleYearRayonChange(year, rayon);
+
+      setSelectedYearOption({
+        value: res.data[0],
+        label: res.data[0].toString(),
+      });
+      res.data.map((year) =>
+        options.push({
+          value: year,
+          label: year.toString(),
+        })
+      );
+    }
+    setYearOption(options);
+  };
+
+  const calculateTourSuccCallback = (res) => {
+    setErrorBool(false);
+    if (res.data.routes.length - 1 > 0) setGroup("A");
+    else setGroup("");
+    setNewTour(res.data);
+    onClose();
+  };
 
   const revert = () => {};
   const commit = () => {};
+
   const handleCalculateTour = () => {
     if (maxSeconds < 1 || maxSeconds > 900) {
       setError("Max Seconds should be between 1 and 900");
@@ -84,113 +89,37 @@ export default function Settings({ isOpen, onClose, setGroup }) {
       setMaxSeconds(10);
       return;
     }
-    axios
-      .post(
-        import.meta.env.VITE_APP_BACKEND_URL +
-          "api/v1/vrp/solve/" +
-          selectedYearOption.value.toString() +
-          "/" +
-          rayonOption.value.toString(),
-        {
-          maxTimeInSeconds: maxSeconds,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((res) => {
-        setErrorBool(false);
-        if (res.data.routes.length - 1 > 0) setGroup("A");
-        else setGroup("");
-        setNewTour(res.data);
-        onClose();
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.response.status === 403)
-            navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-      });
+    postCalculateTour(
+      calculateTourSuccCallback,
+      errCallback,
+      { maxTimeInSeconds: maxSeconds },
+      selectedYearOption.value,
+      rayonOption.value
+    );
   };
+
+  const downloadExcelSuccCallback = (res) => {
+    var a = window.document.createElement("a");
+    a.href = window.URL.createObjectURL(res.data);
+    a.download = `Laufliste_${year}.xlsm`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const handleDownloadExcel = () => {
-    axios
-      .get(
-        import.meta.env.VITE_APP_BACKEND_URL +
-          "api/v1/vrp/excel/" +
-          year.toString(),
-        {
-          headers: {
-            "Content-Type": "application/octet-stream",
-          },
-          responseType: "blob",
-        }
-      )
-      .then((res) => {
-        var a = window.document.createElement("a");
-        a.href = window.URL.createObjectURL(res.data);
-        a.download = `Laufliste_${year}.xlsm`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.response.status === 403)
-            navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-      });
+    getExcel(downloadExcelSuccCallback, errCallback, selectedYearOption.value);
+  };
+
+  const tourSuccCallback = (res) => {
+    setErrorBool(false);
+    if (res.data.routes.length - 1 > 0) setGroup("A");
+    else setGroup("");
+    setNewTour(res.data);
   };
 
   const handleYearRayonChange = (newYear, newRayon) => {
-    axios
-      .get(
-        `${
-          import.meta.env.VITE_APP_BACKEND_URL
-        }api/v1/tour/TST/${newYear}/${newRayon}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((res) => {
-        setErrorBool(false);
-        if (res.data.routes.length - 1 > 0) setGroup("A");
-        else setGroup("");
-        setNewTour(res.data);
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.response.status === 403)
-            navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-      });
+    getTour(tourSuccCallback, errCallback, newYear, newRayon);
   };
 
   const handleClose = () => {

@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 const TableComponent = ({ route, group, nameRef }) => {
-    const [senior, setSenior] = useState();
-    const [children, setChildren] = useState(0);
+  const [senior, setSenior] = useState();
+  const [children, setChildren] = useState(0);
 
-    useEffect(() => {
-      let s = 0;
-      let s1 = 0;
-      route.customers.forEach((c) => s = c.children + s);
-      route.customers.forEach((c) => s1 = c.seniors + s1);
-      setChildren(s);
-      setSenior(s1);
-    }, [route])
+  useEffect(() => {
+    let s = 0;
+    let s1 = 0;
+    route.customers.forEach((c) => (s = c.children + s));
+    route.customers.forEach((c) => (s1 = c.seniors + s1));
+    setChildren(s);
+    setSenior(s1);
+  }, [route]);
 
   const generateInputRef = (key) => {
     return (ref) => {
@@ -19,19 +19,16 @@ const TableComponent = ({ route, group, nameRef }) => {
   };
 
   function getAbsMinuteDifference(time1, time2) {
-    // Split the time strings into hours and minutes
-    const [hours1, minutes1, sec1] = time1.split(':').map(Number);
-    const [hours2, minutes2, sec2] = time2.split(':').map(Number);
+    const [hours1, minutes1, sec1] = time1.split(":").map(Number);
+    const [hours2, minutes2, sec2] = time2.split(":").map(Number);
 
-    // Calculate the total minutes for each time
     const totalMinutes1 = hours1 * 60 + minutes1;
     const totalMinutes2 = hours2 * 60 + minutes2;
 
-    // Calculate the absolute difference in minutes
     const diffInMinutes = Math.abs(totalMinutes2 - totalMinutes1);
 
     return diffInMinutes;
-}
+  }
   return (
     <div className="w-full p-4">
       <div className="bg-white h-full border border-gray-200 rounded-md shadow-md p-4 dark:bg-gray-800 dark:border-black">
@@ -128,11 +125,19 @@ const TableComponent = ({ route, group, nameRef }) => {
                 <td className="text-nowrap border">Address</td>
                 <td className="text-center">{children}</td>
                 <td className="text-center">{senior}</td>
-                <td className="border">
+                <td className="border text-center">
                   <input
+                    id={"start-time-" + group}
                     className="text-black rounded-md px-1 mx-auto"
                     type="number"
-                    value={route.customers.length > 0 ? getAbsMinuteDifference(route.customers[0].visitTime, route.customerStart) : 0}
+                    value={
+                      route.customers.length > 0
+                        ? getAbsMinuteDifference(
+                            route.customers[0].visitTime,
+                            route.customerStart
+                          )
+                        : 0
+                    }
                     min={0}
                     max={300}
                   />
@@ -141,7 +146,15 @@ const TableComponent = ({ route, group, nameRef }) => {
               {route.customers.map((customer, index) => {
                 var value = 0;
                 if (index < route.customers.length - 1)
-                  value = getAbsMinuteDifference(route.customers[index].visitTime, route.customers[index+1].visitTime);
+                  value = getAbsMinuteDifference(
+                    route.customers[index].visitTime,
+                    route.customers[index + 1].visitTime
+                  );
+                else
+                  value = getAbsMinuteDifference(
+                    route.customerEnd,
+                    route.customers[index].visitTime
+                  );
 
                 return (
                   <tr key={"table-row-" + index} className="border">
@@ -162,6 +175,7 @@ const TableComponent = ({ route, group, nameRef }) => {
                     </td>
                     <td className="text-nowrap border text-center">
                       <input
+                        id={"time-intervall-" + group + index}
                         className="text-black rounded-md px-1 mx-auto"
                         type="number"
                         defaultValue={value}
@@ -172,6 +186,16 @@ const TableComponent = ({ route, group, nameRef }) => {
                   </tr>
                 );
               })}
+              <tr key={"table-row-last"} className="border">
+                <td className="border border-gray-300 rounded-md p-1">
+                  {route.customerEnd.slice(0, 5)}
+                </td>
+                <td className="text-nowrap max-w-56 overflow-hidden border px-1"></td>
+                <td className="text-nowrap border px-1">Grossmatt 5</td>
+                <td className="text-nowrap border text-center px-1"></td>
+                <td className="text-nowrap border text-center"></td>
+                <td className="text-nowrap border text-center"></td>
+              </tr>
             </tbody>
           </table>
         </div>

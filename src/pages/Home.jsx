@@ -28,12 +28,13 @@ export default function Home() {
     date,
     moveItem,
     numOfGroups,
-    setGroupStartDate,
+    setGroupStartTime,
     reverseGroup,
-    setSamichlausGroupName
+    setSamichlausGroupName,
+    setTourDate,
   } = useTour();
   console.log(tour);
-  console.log(group)
+  console.log(group);
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
   const [layerControl, setLayerControl] = useState(null);
@@ -100,7 +101,7 @@ export default function Home() {
     });
     const newLayerGroup = [];
     for (let i = 0; i < numOfGroups + 1; i++) {
-      if ((!group  || !dragOverGroup) && numOfGroups > 0) {
+      if ((!group || !dragOverGroup) && numOfGroups > 0) {
         setGroup("A");
         setDragOverGroup("A");
       }
@@ -122,11 +123,19 @@ export default function Home() {
           iconRetinaUrl: markerURI,
           popupAnchor: [0, -20],
         });
-        markers.push(
-          L.marker([customer.address.latitude, customer.address.longitude], {
+        const marker = L.marker(
+          [customer.address.latitude, customer.address.longitude],
+          {
             icon: icon,
-          })
+          }
         );
+        const ng = g;
+        if (g !== "Z")
+          marker.on('click', () => {
+              setGroup(ng);
+              setDragOverGroup(ng);
+          });
+        markers.push(marker);
         polyline.push([customer.address.latitude, customer.address.longitude]);
       });
       if (g === "Z") {
@@ -158,11 +167,11 @@ export default function Home() {
       const values = {};
       Object.keys(nameRef.current).forEach((value, index) => {
         if (nameRef.current[value])
-        values[value] = nameRef.current[value].value;
-      })
+          values[value] = nameRef.current[value].value;
+      });
       setSamichlausGroupName(values);
     }
-  }
+  };
 
   const changeEditMode = () => {
     saveSamichlausGroupNames();
@@ -178,36 +187,12 @@ export default function Home() {
     setDragOverGroup(group);
   };
 
-  const changeStartDate = (e) => {
-    if (e.target.name === "visit-date") {
-      setGroupStartDate(
-        group,
-        new Date(
-          e.target.value +
-            "T" +
-            tour[group].customerStart
-              .getUTCHours()
-              .toString()
-              .padStart(2, "0") +
-            ":" +
-            tour[group].customerStart
-              .getUTCMinutes()
-              .toString()
-              .padStart(2, "0") +
-            ":00.000Z"
-        )
-      );
-    } else if (e.target.name === "visit-time") {
-      setGroupStartDate(
-        group,
-        new Date(
-          tour[group].customerStart.toISOString().slice(0, 10) +
-            "T" +
-            e.target.value +
-            ":00.000"
-        )
-      );
-    }
+  const changeTourDate = (e) => {
+    setTourDate(e.target.value);
+  };
+
+  const changeGroupStartTime = (e) => {
+    setGroupStartTime(group, e.target.value + ":00");
   };
 
   return (
@@ -277,16 +262,16 @@ export default function Home() {
                       <div>{year}</div>
                       <div>Rayon {"I".repeat(rayon)}</div>
                     </div>
-                    {group ? (
+                    {/* {group ? (
                       <div className="flex gap-2 text-nowrap">
                         <div className="select-none">Start: </div>
                         <div className="select-none">
-                          {date +
+                          {date.slice(5) +
                             ", " +
                             tour[group].customerStart.slice(0, 5)}
                         </div>
                       </div>
-                    ) : null}
+                    ) : null} */}
                   </div>
                 </div>
               </div>
@@ -374,8 +359,10 @@ export default function Home() {
                             className="dark:text-black border border-black rounded-md"
                             name="visit-date"
                             type="date"
+                            min={date.slice(0, 4) + "-01-01"}
+                            max={date.slice(0, 4) + "-12-31"}
                             value={date}
-                            onChange={(e) => changeStartDate(e)}
+                            onChange={(e) => changeTourDate(e)}
                           ></input>
                         </div>
                         <div className="flex-row flex gap-8 items-start justify-items-start">
@@ -385,7 +372,7 @@ export default function Home() {
                             name="visit-time"
                             type="time"
                             value={tour[group].customerStart.slice(0, 5)}
-                            onChange={(e) => changeStartDate(e)}
+                            onChange={(e) => changeGroupStartTime(e)}
                           ></input>
                         </div>
                       </div>

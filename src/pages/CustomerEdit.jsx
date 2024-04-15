@@ -1,9 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-import axios from "axios";
 import { useEffect } from "react";
 import AsyncSelect from "react-select/async";
 import BackButton from "../components/BackButton";
+import { getAddressesContaining, getCustomer, putCustomer } from "../utils/utils";
 
 export default function CustomerEdit() {
   const { uuid } = useParams();
@@ -19,137 +19,88 @@ export default function CustomerEdit() {
   const [seniors, setSeniors] = useState(0);
   const [visitRayon, setVisitRayon] = useState(1);
   const [visitYear, setVisitYear] = useState(0);
-  const [visitTime, setVisitTime] = useState('');
+  const [visitTime, setVisitTime] = useState("");
   const navigate = useNavigate();
-  
 
   const openInNewTab = (url) => {
-    const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
-    if (newWindow) newWindow.opener = null
-  }
+    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (newWindow) newWindow.opener = null;
+  };
+  const errCallback = (err) => {
+    if (err.response) {
+      if (err.response.status === 403) navigate("/logout", { replace: true });
+      setError(
+        "Error (" + err.response.status + "): " + err.response.data.message
+      );
+    } else if (err.request) {
+      setError("Unexpected Error: " + err.message);
+    } else {
+      setError("Unexpected Error: " + err.message);
+    }
+    setErrorBool(true);
+  };
+
+  const customerSuccCallback = (res) => {
+    setSelectedAddress({
+      label: res.data.address.address,
+      value: res.data.address.addressId,
+      rayon: res.data.visitRayon,
+    });
+    setFirstName(res.data.firstName);
+    setLastName(res.data.lastName);
+    setChildren(res.data.children);
+    setSeniors(res.data.seniors);
+    setVisitRayon(res.data.visitRayon);
+    setVisitYear(res.data.year);
+    setLink(res.data.link);
+    setPhone(res.data.phone);
+    setEmail(res.data.email);
+    setVisitTime(res.data.visitTime);
+  };
 
   useEffect(() => {
-    axios
-      .get(import.meta.env.VITE_APP_BACKEND_URL + "api/v1/customer/" + uuid, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then((res) => {
-        setSelectedAddress({
-          label: res.data.address.address,
-          value: res.data.address.addressId,
-          rayon: res.data.visitRayon,
-        });
-        setFirstName(res.data.firstName);
-        setLastName(res.data.lastName);
-        setChildren(res.data.children);
-        setSeniors(res.data.seniors);
-        setVisitRayon(res.data.visitRayon);
-        setVisitYear(res.data.year);
-        setLink(res.data.link);
-        setPhone(res.data.phone);
-        setEmail(res.data.email);
-        setVisitTime(res.data.visitTime);
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.response.status === 403)
-            navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-      });
+    getCustomer(customerSuccCallback, errCallback, uuid);
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .put(
-        import.meta.env.VITE_APP_BACKEND_URL + "api/v1/customer/" + uuid,
-        {
-          addressId: selectedAddress.value,
-          firstName: firstName,
-          lastName: lastName,
-          children: children,
-          seniors: seniors,
-          year: visitYear,
-          visitRayon: visitRayon,
-          link: link,
-          phone: phone,
-          email: email,
-          visitTime: visitTime
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((res) => {
-        navigate("/", { replace: true });
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.response.status === 403)
-            navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-      });
+    const data = {
+      addressId: selectedAddress.value,
+      firstName: firstName,
+      lastName: lastName,
+      children: children,
+      seniors: seniors,
+      year: visitYear,
+      visitRayon: visitRayon,
+      link: link,
+      phone: phone,
+      email: email,
+      visitTime: visitTime,
+    };
+    putCustomer(() => navigate("/", { replace: true }), errCallback, data, uuid);
+  };
+
+  const getAddressesSuccCallback = (res, callback) => {
+    setErrorBool(false);
+    if (res.status === 204) {
+      callback([]);
+      return;
+    }
+    const options = res.data.map((address) => ({
+      value: address.addressId,
+      label: address.address,
+      rayon: address.rayon,
+    }));
+    callback(options);
   };
 
   const loadOptions = (inputValue, callback) => {
-    axios
-      .get(
-        import.meta.env.VITE_APP_BACKEND_URL +
-          "api/v1/address?address=" +
-          encodeURI(inputValue) +
-          "&limit=100",
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      )
-      .then((res) => {
-        if (res.status === 204) {
-          callback([]);
-          return;
-        }
-        const options = res.data.map((address) => ({
-          value: address.addressId,
-          label: address.address,
-          rayon: address.rayon,
-        }));
-        callback(options);
-      })
-      .catch((err) => {
-        if (err.response) {
-          if (err.status === 403) navigate("/logout", { replace: true });
-          setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
-          );
-        } else if (err.request) {
-          setError("Unexpected Error: " + err.message);
-        } else {
-          setError("Unexpected Error: " + err.message);
-        }
-        setErrorBool(true);
-        callback([]);
-      });
+    getAddressesContaining(
+      inputValue,
+      callback,
+      getAddressesSuccCallback,
+      errCallback
+    );
   };
 
   return (
@@ -159,7 +110,10 @@ export default function CustomerEdit() {
         <div className="mb-2 dark:text-white ">
           <div className=" text-xl font-bold">Update Customer</div>
           {link ? (
-            <div className="absolute translate-x-44 -translate-y-6 hover:cursor-pointer" onClick={() => openInNewTab(link)}>
+            <div
+              className="absolute translate-x-44 -translate-y-6 hover:cursor-pointer"
+              onClick={() => openInNewTab(link)}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
