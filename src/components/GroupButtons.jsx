@@ -6,14 +6,15 @@ import {
   MAX_GROUPS,
 } from "../constants/Constants";
 import { useTour } from "../provider/TourProvider";
+import { createRoute } from "../utils/utils";
 
 export default function GroupButtons({ group, setGroup, setDragOverGroup }) {
   const [isDeleteGroupOpen, setIsDeleteGroupOpen] = useState([]);
-  const { tour, addNewGroup, removeGroup, numOfGroups } = useTour();
+  const { tour, addNewGroup, removeGroup, numOfGroups, tourId } = useTour();
 
   useEffect(() => {
     if (numOfGroups > 0)
-    setIsDeleteGroupOpen(new Array(numOfGroups).fill(false));
+      setIsDeleteGroupOpen(new Array(numOfGroups).fill(false));
   }, [numOfGroups]);
 
   const handleDeleteGroupOpenMenu = (e, val) => {
@@ -36,6 +37,44 @@ export default function GroupButtons({ group, setGroup, setDragOverGroup }) {
 
   const dragEnter = (_, newGroup) => {
     setDragOverGroup(newGroup);
+  };
+
+  const handleAddGroup = () => {
+    if (numOfGroups === 0) {
+      createRoute(
+        (res) => addNewGroup(res.data),
+        () => {},
+        {
+          customerStart: "00:00:00",
+          customerEnd: "00:00:00",
+          transport: "foot",
+          samichlaus: "",
+          ruprecht: "",
+          schmutzli: "",
+          engel1: "",
+          engel2: "",
+          group: GROUP_LIST[numOfGroups],
+          tourId: tourId,
+        }
+      );
+    } else {
+      createRoute(
+        (res) => addNewGroup(res.data),
+        () => {},
+        {
+          customerStart: tour["A"].customerStart,
+          customerEnd: tour["A"].customerStart,
+          transport: "foot",
+          samichlaus: "",
+          ruprecht: "",
+          schmutzli: "",
+          engel1: "",
+          engel2: "",
+          group: GROUP_LIST[numOfGroups],
+          tourId: tourId,
+        }
+      );
+    }
   };
 
   return (
@@ -90,7 +129,7 @@ export default function GroupButtons({ group, setGroup, setDragOverGroup }) {
       })}
       {numOfGroups < MAX_GROUPS ? (
         <span
-          onClick={addNewGroup}
+          onClick={handleAddGroup}
           className="flex items-center h-10 w-10 rounded-lg border-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-600 p-1 text-center hover:cursor-pointer"
         >
           <svg

@@ -52,9 +52,12 @@ export default function CustomerEdit() {
     setSeniors(res.data.seniors);
     setVisitRayon(res.data.visitRayon);
     setVisitYear(res.data.year);
-    setLink(res.data.link);
-    setPhone(res.data.phone);
-    setEmail(res.data.email);
+    if (res.data.link != null)
+        setLink(res.data.link);
+    if (res.data.phone != null)
+        setPhone(res.data.phone);
+    if (res.data.email != null)
+        setEmail(res.data.email);
     setVisitTime(res.data.visitTime);
   };
 
@@ -71,7 +74,7 @@ export default function CustomerEdit() {
       children: children,
       seniors: seniors,
       year: visitYear,
-      visitRayon: visitRayon,
+      visitRayon: visitRayon - 1,
       link: link,
       phone: phone,
       email: email,
@@ -161,7 +164,6 @@ export default function CustomerEdit() {
                 className="w-full rounded-lg p-1 border-black border-2"
                 id="email"
                 type="text"
-                readOnly
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -172,7 +174,6 @@ export default function CustomerEdit() {
               <input
                 className="w-full rounded-lg p-1 border-black border-2"
                 id="phone"
-                readOnly
                 type="text"
                 required
                 value={phone}

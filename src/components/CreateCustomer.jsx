@@ -68,7 +68,7 @@ export default function CreateCustomer({ isOpen, onClose }) {
       children: children,
       seniors: seniors,
       year: visitYear,
-      visitRayon: visitRayon,
+      visitRayon: visitRayon - 1, //Ordinal number required
     };
     postCreateCustomer(createCustomerSuccCallback, errCallback, data);
   };

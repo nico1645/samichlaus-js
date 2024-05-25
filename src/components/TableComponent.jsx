@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useTour } from "../provider/TourProvider";
 const TableComponent = ({ route, group, nameRef }) => {
   const [senior, setSenior] = useState();
   const [children, setChildren] = useState(0);
+  const { addTime } = useTour();
 
   useEffect(() => {
     let s = 0;
@@ -16,6 +18,34 @@ const TableComponent = ({ route, group, nameRef }) => {
     return (ref) => {
       nameRef.current[group + key] = ref;
     };
+  };
+
+  const handleTimeChange = (e, index) => {
+    if (!parseInt(e.target.value)) return;
+    const value = parseInt(e.target.value);
+    if (value > 300 || value < 0) return;
+    if (index === -1) {
+      if (route.customers.length === 0) {
+        addTime(group, index, value - getAbsMinuteDifference(
+          route.customerStart,
+          route.customerEnd
+        ));
+      } else {
+        addTime(group, 0, value - getAbsMinuteDifference(
+          route.customerStart,
+          route.customers[0].visitTime
+        ));
+      }
+    } else if (index < route.customers.length - 1)
+      addTime(group, index + 1, value - getAbsMinuteDifference(
+        route.customers[index].visitTime,
+        route.customers[index + 1].visitTime
+      ));
+    else
+      addTime(group, -1, value - getAbsMinuteDifference(
+        route.customerEnd,
+        route.customers[index].visitTime
+      ));
   };
 
   function getAbsMinuteDifference(time1, time2) {
@@ -102,24 +132,24 @@ const TableComponent = ({ route, group, nameRef }) => {
               type="text"
               defaultValue={route.engel2}
               ref={generateInputRef("engel2")}
-              className="flex-grow border border-gray-300 rounded-md p-1"
+              className="flex-grow border border-gray-300 rounded-md p-1 text-black"
             />
           </div>
           {/* Name, Adresse, Children, Senior, and Time Interval inputs */}
           <table className="border p-2">
             <thead>
               <tr>
-                <th className="">Start Time</th>
+                <th className="border px-1">Start Time</th>
                 <th className="text-nowrap" colSpan={2}>
                   Laufen/Fahren
                 </th>
-                <th>Children</th>
-                <th>Seniors</th>
-                <th>Minutes</th>
+                <th className=" px-1">Children</th>
+                <th className=" px-1">Seniors</th>
+                <th className=" px-1">Minutes</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border">
+              <tr className="border text-center">
                 <td className=" border">{route.customerStart.slice(0, 5)}</td>
                 <td className="text-nowrap border">Name</td>
                 <td className="text-nowrap border">Address</td>
@@ -138,6 +168,7 @@ const TableComponent = ({ route, group, nameRef }) => {
                           )
                         : 0
                     }
+                    onChange={(e) => handleTimeChange(e, -1)}
                     min={0}
                     max={300}
                   />
@@ -178,7 +209,8 @@ const TableComponent = ({ route, group, nameRef }) => {
                         id={"time-intervall-" + group + index}
                         className="text-black rounded-md px-1 mx-auto"
                         type="number"
-                        defaultValue={value}
+                        value={value}
+                        onChange={(e) => handleTimeChange(e, index)}
                         min={0}
                         max={300}
                       />

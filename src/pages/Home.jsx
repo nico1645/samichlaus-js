@@ -13,6 +13,7 @@ import GroupButtons from "../components/GroupButtons";
 import Sidebar from "../components/Sidebar";
 import CardComponent from "../components/CardComponent";
 import TableComponent from "../components/TableComponent";
+import { updateManyCustomers } from "../utils/utils";
 
 export default function Home() {
   const [isCreateCustomerOpen, setIsCreateCustomerOpen] = useState(false);
@@ -95,7 +96,7 @@ export default function Home() {
   }, [tour]);
 
   const renderAll = () => {
-    layerGroups.forEach((layer, index) => {
+    layerGroups.forEach((layer) => {
       map.removeLayer(layer);
       layerControl.removeLayer(layer);
     });
@@ -165,10 +166,21 @@ export default function Home() {
   const saveSamichlausGroupNames = () => {
     if (isTableMode) {
       const values = {};
-      Object.keys(nameRef.current).forEach((value, index) => {
+      Object.keys(nameRef.current).forEach((value) => {
         if (nameRef.current[value])
           values[value] = nameRef.current[value].value;
       });
+      const customers = [];
+      Object.values(tour).forEach((route) => {
+        if (route === "Z") return;
+        route.customers.forEach((customer) => {
+          customers.push({
+            customerId: customer.customerId,
+            visitTime: customer.visitTime,
+          })
+        })
+      })
+      updateManyCustomers(() => {}, () => {}, customers);
       setSamichlausGroupName(values);
     }
   };
@@ -222,9 +234,10 @@ export default function Home() {
               className="ml-4 absolute p-2 rounded-lg bg-primary-600 hover:bg-primary-800 text-white select-none -translate-y-8"
               onClick={() => saveSamichlausGroupNames()}
             >
-              Save Names
+              Save Changes
             </button>
             {GROUP_LIST.map((group, index) => {
+              console.log(numOfGroups + " index: " + index + " group: " + group)
               if (index >= numOfGroups || tour[group].customers.length === 0)
                 return null;
 
@@ -289,7 +302,7 @@ export default function Home() {
                           </span>
                           <div
                             className="h-20 flex flex-grow items-center bg-gray-50 dark:bg-gray-900 border-white border-b border-r dark:border-gray-700"
-                            onDragEnd={(e) => {
+                            onDragEnd={() => {
                               dropItem(i, dragTo, group, dragOverGroup);
                             }}
                             onDragEnter={(e) => dragEnter(e, i)}
@@ -388,7 +401,7 @@ export default function Home() {
                               <div
                                 key={"unassigned-" + index}
                                 className="h-20 bg-gray-50 dark:bg-gray-800"
-                                onDragEnd={(e) => {
+                                onDragEnd={() => {
                                   dropItem(index, dragTo, "Z", dragOverGroup);
                                 }}
                                 draggable
