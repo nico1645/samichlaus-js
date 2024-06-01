@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTour } from "../provider/TourProvider";
 import { getAddressesContaining, postCreateCustomer } from "../utils/utils";
 
-export default function CreateCustomer({ isOpen, onClose }) {
+export default function CreateCustomer({ isOpen, onClose, customer }) {
   const modal = useRef(null);
   const [error, setError] = useState("");
   const [errorBool, setErrorBool] = useState(false);
@@ -21,12 +21,26 @@ export default function CreateCustomer({ isOpen, onClose }) {
   useEffect(() => {
     if (modal.current) {
       if (isOpen) {
+        if (customer) {
+            setFirstName(customer.firstName);
+            setLastName(customer.lastName);
+            setChildren(customer.children);
+            setSeniors(customer.seniors);
+            setVisitYear(year);
+            setVisitRayon(customer.visitRayon);
+            setSelectedAddress({
+                value: customer.address.addressId,
+                label: customer.address.address,
+                rayon: customer.address.rayon,
+            });
+        }
         modal.current.showModal();
       } else {
         modal.current.close();
       }
     }
   }, [isOpen]);
+
 
   const reset = (e) => {
     setErrorBool(false);

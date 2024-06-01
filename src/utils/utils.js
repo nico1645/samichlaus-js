@@ -33,6 +33,17 @@ export const getYears = (succCallback, errCallback) => {
     .catch((err) => errCallback(err));
 };
 
+export const getCustomers = (succCallback, errCallback, year) => {
+  axios
+    .get(import.meta.env.VITE_APP_BACKEND_URL + "api/v1/customer/get/" + year, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res) => succCallback(res))
+    .catch((err) => errCallback(err));
+};
+
 export const postCalculateTour = (
   succCallback,
   errCallback,

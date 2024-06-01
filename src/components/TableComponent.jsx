@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getAbsMinuteDifference } from "../constants/Constants.js";
 import { useTour } from "../provider/TourProvider";
 const TableComponent = ({ route, group, nameRef }) => {
   const [senior, setSenior] = useState();
@@ -48,17 +49,6 @@ const TableComponent = ({ route, group, nameRef }) => {
       ));
   };
 
-  function getAbsMinuteDifference(time1, time2) {
-    const [hours1, minutes1, sec1] = time1.split(":").map(Number);
-    const [hours2, minutes2, sec2] = time2.split(":").map(Number);
-
-    const totalMinutes1 = hours1 * 60 + minutes1;
-    const totalMinutes2 = hours2 * 60 + minutes2;
-
-    const diffInMinutes = Math.abs(totalMinutes2 - totalMinutes1);
-
-    return diffInMinutes;
-  }
   return (
     <div className="w-full p-4">
       <div className="bg-white h-full border border-gray-200 rounded-md shadow-md p-4 dark:bg-gray-800 dark:border-black">

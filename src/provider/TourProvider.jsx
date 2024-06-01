@@ -7,6 +7,8 @@ import {
   route_comparator_address,
   addMinutesToTime,
   route_comparator_group,
+  getAbsMinuteDifference,
+  getVisitTime,
 } from "../constants/Constants";
 import {
   createRoute,
@@ -35,6 +37,135 @@ const ACTIONS = {
   removeCustomer: "removeCustomer",
   addTime: "addTime",
 };
+
+const _moveItem = (fromGroup, toGroup, fromIndex, toIndex, oldTour, newTour) => {
+    const customer = { ...oldTour[fromGroup].customers[fromIndex] };
+    const updateCustomers = [];
+    const updateRoutes = [];
+    if (fromGroup === "Z") {
+      const tmpStartTime = toIndex === newTour[toGroup].customers.length ? newTour[toGroup].customerEnd : newTour[toGroup].customers[toIndex].visitTime;
+      customer.visitTime = tmpStartTime;
+      const interval = getVisitTime(oldTour[fromGroup].customers[fromIndex].children, oldTour[fromGroup].customers[fromIndex].seniors);
+      newTour[fromGroup].customers.splice(fromIndex, 1);
+      newTour[toGroup].customers.splice(toIndex, 0, customer);
+      for (let i = toIndex+1; i < newTour[toGroup].customers.length; i++) {
+        newTour[toGroup].customers[i].visitTime = addMinutesToTime(newTour[toGroup].customers[i].visitTime, interval);
+        updateCustomers.push({
+            customerId: newTour[toGroup].customers[i].customerId,
+            visitTime: newTour[toGroup].customers[i].visitTime,
+        });
+      }
+      newTour[toGroup].customerEnd = addMinutesToTime(newTour[toGroup].customerEnd, interval);
+      updateRoutes.push({
+        routeId: newTour[toGroup].routeId,
+        customerEnd: newTour[toGroup].customerEnd,
+      });
+    } else if (toGroup === "Z") {
+      const interval = fromIndex === newTour[fromGroup].customers.length - 1 ? getAbsMinuteDifference(customer.visitTime, newTour[fromGroup].customerEnd) : getAbsMinuteDifference(customer.visitTime, newTour[fromGroup].customers[fromIndex + 1].visitTime);
+      newTour[fromGroup].customers.splice(fromIndex, 1);
+      newTour[toGroup].customers.push(customer);
+      for (let i = fromIndex; i < newTour[fromGroup].customers.length; i++) {
+        newTour[fromGroup].customers[i].visitTime = addMinutesToTime(newTour[fromGroup].customers[i].visitTime, -interval);
+        updateCustomers.push({
+            customerId: newTour[fromGroup].customers[i].customerId,
+            visitTime: newTour[fromGroup].customers[i].visitTime,
+        });
+      }
+      newTour[fromGroup].customerEnd = addMinutesToTime(newTour[fromGroup].customerEnd, -interval);
+      updateRoutes.push({
+        routeId: newTour[fromGroup].routeId,
+        customerEnd: newTour[fromGroup].customerEnd,
+      });
+    }
+
+    if (toGroup === "Z")
+      newTour[toGroup].customers.sort(route_comparator_address);
+
+    updateCustomers.push({
+          customerId: customer.customerId,
+          routeId: newTour[toGroup].routeId,
+          visitTime: customer.visitTime,
+      });
+
+    if (updateRoutes.length > 0)
+        updateManyRoutes(
+            () => {},
+            () => {},
+            updateRoutes
+        );
+
+    updateManyCustomers(
+      () => {},
+      () => {},
+      updateCustomers
+    );
+
+    return newTour;
+}
+
+const _setGroupStartTime = (tour, group, startTime) => {
+  const updateCustomerData = [];
+  const absMinuteDiff = getAbsMinuteDifference(startTime, tour[group].customerStart);
+  const newCustomerEnd = addMinutesToTime(tour[group].customerEnd, absMinuteDiff);
+  tour[group].customerStart = startTime;
+  tour[group].customerEnd = newCustomerEnd;
+  updateRoute(() => {}, () => {}, {
+    routeId: tour[group].routeId,
+    customerStart: startTime,
+    customerEnd: newCustomerEnd,
+  });
+  tour[group].customers.forEach((c) => {
+    const newTime = addMinutesToTime(c.visitTime, absMinuteDiff);
+    c.visitTime = newTime;
+    updateCustomerData.push({
+            customerId: c.customerId,
+            visitTime: newTime,
+    });
+  })
+  updateManyCustomers(
+    () => {},
+    () => {},
+    updateCustomerData
+  );
+  return tour;
+}
+
+const _reverseGroup = (group, tour) => {
+    const updateCustomerData = [];
+    var currentTime = tour[group].customerStart;
+    var time;
+    for (let i = tour[group].customers.length - 1; i >= 0 ; i--) {
+        if (i === tour[group].customers.length - 1) {
+            time = addMinutesToTime(currentTime, getAbsMinuteDifference(tour[group].customers[i].visitTime, tour[group].customerEnd));
+            updateCustomerData.push({
+                customerId: tour[group].customers[i].customerId,
+                visitTime: time,
+            });
+        } else {
+            time = addMinutesToTime(currentTime, getAbsMinuteDifference(tour[group].customers[i+1].visitTime, tour[group].customers[i].visitTime));
+            updateCustomerData.push({
+                customerId: tour[group].customers[i].customerId,
+                visitTime: time,
+            });
+        }
+        currentTime = time;
+    }
+
+    tour[group].customers = [
+      ...tour[group].customers.reverse(),
+    ];
+
+    for (let i = tour[group].customers.length - 1; i >= 0 ; i--) {
+        tour[group].customers[i].visitTime = updateCustomerData[i].visitTime;
+    }
+
+    updateManyCustomers(
+      () => {},
+      () => {},
+      updateCustomerData
+    );
+    return tour;
+}
 
 // Reducer function to handle authentication state changes
 const tourReducer = (state, action) => {
@@ -199,37 +330,23 @@ const tourReducer = (state, action) => {
       };
 
     case ACTIONS.moveItem:
-      const fromGroup = action.payload.fromGroup;
-      const toGroup = action.payload.toGroup;
-      const fromIndex = action.payload.fromIndex;
-      const toIndex = action.payload.toIndex;
-      const newTour = { ...state.tour };
-
-      if (fromGroup !== "Z" && fromGroup !== toGroup) {
-        newTour[toGroup].customers.push(
-          state.tour[fromGroup].customers[fromIndex]
-        );
-        newTour[fromGroup].customers.splice(fromIndex, 1);
-      } else if (fromGroup === "Z" || fromIndex !== toIndex) {
-        const tmp = newTour[fromGroup].customers.splice(fromIndex, 1);
-        if (newTour[toGroup].customers.length - 1 === toIndex)
-          newTour[toGroup].customers.push(tmp[0]);
-        else newTour[toGroup].customers.splice(toIndex, 0, tmp[0]);
-      } else {
+      if (action.payload.fromGroup === action.payload.toGroup
+                && action.payload.fromIndex === action.payload.toIndex || action.payload.toGroup === "")
         return state;
-      }
-      if (toGroup === "Z")
-        newTour[toGroup].customers.sort(route_comparator_address);
 
-      return { ...state, tour: newTour };
+      return { ...state, 
+                tour: _moveItem(
+                action.payload.fromGroup, 
+                action.payload.toGroup, 
+                action.payload.fromIndex, 
+                action.payload.toIndex, 
+                state.tour, 
+                { ...state.tour }) 
+            };
 
     case ACTIONS.setGroupStartTime:
-      state.tour[action.payload.group].customerStart = action.payload.date;
-      updateRoute(() => {}, () => {}, {
-        routeId: state.tour[action.payload.group].routeId,
-        customerStart: action.payload.date,
-      });
-      return { ...state, tour: { ...state.tour } };
+      
+      return { ...state, tour: { ..._setGroupStartTime(state.tour, action.payload.group, action.payload.date) } };
 
     case ACTIONS.setTourDate:
       putTour(
@@ -241,10 +358,7 @@ const tourReducer = (state, action) => {
       return { ...state, date: action.payload.date };
 
     case ACTIONS.reverseGroup:
-      state.tour[action.payload.group].customers = [
-        ...state.tour[action.payload.group].customers.reverse(),
-      ];
-      return { ...state, tour: { ...state.tour } };
+      return { ...state, tour: { ..._reverseGroup(action.payload.group, state.tour) } };
 
     case ACTIONS.setSamichlausGroupName:
       const updateRouteNameDate = [];
@@ -290,7 +404,7 @@ const tourReducer = (state, action) => {
 
     case ACTIONS.addTime:
       const addValue = action.payload.value;
-      console.log("Index:" + action.payload.index +" Group:" + action.payload.group + " Value: " + addValue);
+      //console.log("Index:" + action.payload.index +" Group:" + action.payload.group + " Value: " + addValue);
       if (action.payload.index === -1) {
         state.tour[action.payload.group].customerEnd = addMinutesToTime(
           state.tour[action.payload.group].customerEnd,
@@ -302,7 +416,7 @@ const tourReducer = (state, action) => {
           i < state.tour[action.payload.group].customers.length;
           i++
         ) {
-          console.log(i + " " + state.tour[action.payload.group].customers.length);
+          //console.log(i + " " + state.tour[action.payload.group].customers.length);
           state.tour[action.payload.group].customers[i].visitTime = addMinutesToTime(
             state.tour[action.payload.group].customers[i].visitTime,
             addValue

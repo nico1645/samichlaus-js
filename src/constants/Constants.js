@@ -79,6 +79,18 @@ const padZero = (num) => {
   return num < 10 ? '0' + num : num.toString();
 }
 
+export const getAbsMinuteDifference = (time1, time2) => {
+  const [hours1, minutes1, sec1] = time1.split(":").map(Number);
+  const [hours2, minutes2, sec2] = time2.split(":").map(Number);
+
+  const totalMinutes1 = hours1 * 60 + minutes1;
+  const totalMinutes2 = hours2 * 60 + minutes2;
+
+  const diffInMinutes = Math.abs(totalMinutes2 - totalMinutes1);
+
+  return diffInMinutes;
+}
+
 export const parseDate = (utcString) => {
   if (!utcString) return null;
   var dateComponents = utcString.split(/[T:+-]/);
@@ -94,3 +106,32 @@ export const parseDate = (utcString) => {
     )
   );
 };
+
+const childMap = {
+    0: 0,
+    1: 15,
+    2: 20,
+    3: 30,
+    4: 40
+}
+const seniorMap = {
+    0: 0,
+    1: 10,
+    2: 20,
+    3: 30,
+    4: 40
+}
+
+export const getVisitTime = (children, seniors) => {
+    var time = 0;
+    if (childMap[children] != null)
+        time += childMap[children];
+    else
+        time += 40;
+    if (seniorMap[seniors] != null)
+        time += seniorMap[seniors];
+    else
+        time += 40;
+    console.log("time: " + time);
+    return time
+}

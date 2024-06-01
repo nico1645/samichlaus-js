@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   COLOR_DICT,
   GROUP_DICT,
@@ -8,9 +8,10 @@ import {
 import { useTour } from "../provider/TourProvider";
 import { createRoute } from "../utils/utils";
 
-export default function GroupButtons({ group, setGroup, setDragOverGroup }) {
+export default function GroupButtons({ group, setGroup, moveItem }) {
   const [isDeleteGroupOpen, setIsDeleteGroupOpen] = useState([]);
   const { tour, addNewGroup, removeGroup, numOfGroups, tourId } = useTour();
+  const dragCounter = useRef(0);
 
   useEffect(() => {
     if (numOfGroups > 0)
@@ -29,14 +30,9 @@ export default function GroupButtons({ group, setGroup, setDragOverGroup }) {
       if (numOfGroups === 1) setGroup("");
       else {
         setGroup(GROUP_LIST[numOfGroups - 2]);
-        setDragOverGroup(GROUP_LIST[numOfGroups - 2]);
       }
     removeGroup(val);
     setIsDeleteGroupOpen(new Array(isDeleteGroupOpen.length).fill(false));
-  };
-
-  const dragEnter = (_, newGroup) => {
-    setDragOverGroup(newGroup);
   };
 
   const handleAddGroup = () => {
@@ -79,7 +75,7 @@ export default function GroupButtons({ group, setGroup, setDragOverGroup }) {
 
   return (
     <div className="flex flex-row gap-2 items-center justify-center mt-2 max-w-full overflow-auto">
-      {Object.keys(tour).map((val, i) => {
+      {Object.keys(tour).map((val) => {
         const color = COLOR_DICT[val];
         if (val !== "Z")
           return (
@@ -93,11 +89,11 @@ export default function GroupButtons({ group, setGroup, setDragOverGroup }) {
             >
               <span
                 onClick={() => {
-                  setDragOverGroup(val);
                   setGroup(val);
                 }}
                 onContextMenu={(e) => handleDeleteGroupOpenMenu(e, val)}
-                onDragEnter={(e) => dragEnter(e, val)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => moveItem(e.dataTransfer.getData("fromIndex"), tour[val].customers.length, e.dataTransfer.getData("fromGroup"), val)}
                 className={`flex items-center justify-around select-none h-10 w-10 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-600 text-center hover:cursor-pointer border-2 border-${
                   color === "black" ? "black" : color + "-400"
                 }`}

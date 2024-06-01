@@ -143,7 +143,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
         </span>
       </div>
       <div className="modal-body dark:text-white">
-        <div className="flex items-center mb-4">
+        {/*<div className="flex items-center mb-4">
           <div>Storing data:</div>
           <div className=" flex-grow"></div>
           <div className="flex gap-2">
@@ -160,7 +160,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
               Revert
             </button>
           </div>
-        </div>
+        </div>*/}
         <div className=" flex flex-col md:flex-row items-start gap-2 md:gap-4 mb-4">
           <div className="flex flex-row gap-4 md:gap-8 items-center">
             <div>Year: </div>

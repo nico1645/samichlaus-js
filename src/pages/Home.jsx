@@ -20,7 +20,7 @@ export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTableMode, setIsTableMode] = useState(false);
   const [group, setGroup] = useState("");
-  const [dragTo, setDragTo] = useState(0);
+  const [dragTo, setDragTo] = useState();
   const [dragOverGroup, setDragOverGroup] = useState("");
   const {
     rayon,
@@ -34,13 +34,12 @@ export default function Home() {
     setSamichlausGroupName,
     setTourDate,
   } = useTour();
-  console.log(tour);
-  console.log(group);
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
   const [layerControl, setLayerControl] = useState(null);
   const [layerGroups, setLayerGroups] = useState([]);
   const nameRef = useRef({});
+  const dragCounter = useRef(0);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -62,6 +61,7 @@ export default function Home() {
           '&copy; <a href="https://www.mapbox.com">Satellite Map</a> contributors',
       }
     );
+
 
     const baseMaps = {
       OpenStreetMap: osm,
@@ -104,7 +104,6 @@ export default function Home() {
     for (let i = 0; i < numOfGroups + 1; i++) {
       if ((!group || !dragOverGroup) && numOfGroups > 0) {
         setGroup("A");
-        setDragOverGroup("A");
       }
       const polyline = [];
       const markers = [];
@@ -134,7 +133,6 @@ export default function Home() {
         if (g !== "Z")
           marker.on('click', () => {
               setGroup(ng);
-              setDragOverGroup(ng);
           });
         markers.push(marker);
         polyline.push([customer.address.latitude, customer.address.longitude]);
@@ -191,13 +189,27 @@ export default function Home() {
   };
 
   const dragEnter = (_, position) => {
+    dragCounter.current++;
+    setDragOverGroup(group);
     setDragTo(position);
   };
 
-  const dropItem = (fromIndex, toIndex, fromGroup, toGroup) => {
-    moveItem(fromIndex, toIndex, fromGroup, toGroup);
-    setDragOverGroup(group);
-  };
+  const dragLeave = () => {
+        dragCounter.current--;
+        if (dragCounter.current === 0) {
+            setDragOverGroup("")
+        }
+  }
+
+  const drop = (e) => {
+        console.log("from: " + e.dataTransfer.getData("fromIndex")+ " to: " + dragTo + " fromGroup: " + e.dataTransfer.getData("fromGroup")+ " toGroup: " + dragOverGroup);
+        moveItem(e.dataTransfer.getData("fromIndex"), dragTo, e.dataTransfer.getData("fromGroup"), dragOverGroup);
+    }
+
+  const dragStart = (e, fromIndex, fromGroup) => {
+        e.dataTransfer.setData("fromIndex", fromIndex);
+        e.dataTransfer.setData("fromGroup", fromGroup);
+  }
 
   const changeTourDate = (e) => {
     setTourDate(e.target.value);
@@ -237,7 +249,6 @@ export default function Home() {
               Save Changes
             </button>
             {GROUP_LIST.map((group, index) => {
-              console.log(numOfGroups + " index: " + index + " group: " + group)
               if (index >= numOfGroups || tour[group].customers.length === 0)
                 return null;
 
@@ -267,6 +278,7 @@ export default function Home() {
                 <div className="flex mr-1 md:mx-4 w-[100vh-50%] gap-2 md:mr-32 overflow-y-hidden justify-between">
                   <GroupButtons
                     group={group}
+                    moveItem={moveItem}
                     setGroup={setGroup}
                     setDragOverGroup={setDragOverGroup}
                   />
@@ -275,16 +287,6 @@ export default function Home() {
                       <div>{year}</div>
                       <div>Rayon {"I".repeat(rayon)}</div>
                     </div>
-                    {/* {group ? (
-                      <div className="flex gap-2 text-nowrap">
-                        <div className="select-none">Start: </div>
-                        <div className="select-none">
-                          {date.slice(5) +
-                            ", " +
-                            tour[group].customerStart.slice(0, 5)}
-                        </div>
-                      </div>
-                    ) : null} */}
                   </div>
                 </div>
               </div>
@@ -302,17 +304,18 @@ export default function Home() {
                           </span>
                           <div
                             className="h-20 flex flex-grow items-center bg-gray-50 dark:bg-gray-900 border-white border-b border-r dark:border-gray-700"
-                            onDragEnd={() => {
-                              dropItem(i, dragTo, group, dragOverGroup);
-                            }}
+                            onDrop={(e) => drop(e)}
+                            onDragOver={(e) => e.preventDefault()}
                             onDragEnter={(e) => dragEnter(e, i)}
+                            onDragStart={(e) => dragStart(e, i, group)}
+                            onDragLeave={() => dragLeave()}
                             draggable
                           >
                             <CardComponent
                               customer={customer}
                               index={i}
                               group={group}
-                              dropItem={dropItem}
+                              dropItem={moveItem}
                             />
                           </div>
                         </div>
@@ -321,14 +324,19 @@ export default function Home() {
                     <div
                       key={"list-component-+"}
                       className="flex flex-row bg-gray-50 dark:bg-gray-800 items-center border-white border-b dark:border-gray-700"
-                      onDragEnter={(e) =>
-                        dragEnter(e, tour[group].customers.length - 1)
-                      }
                     >
                       <span className="select-none h-20 w-20 flex items-center flex-shrink-0 justify-center text-2xl font-bold text-center cursor-default bg-gray-200 border-white dark:bg-gray-800 border-r dark:border-gray-700">
                         {tour[group].customers.length + 1}
                       </span>
-                      <div className="flex flex-grow  dark:bg-gray-800 items-center justify-around">
+                      <div 
+                        className="flex flex-grow  dark:bg-gray-800 items-center justify-around"
+                        onDrop={(e) => drop(e)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDragEnter={(e) =>
+                          dragEnter(e, tour[group].customers.length)
+                        }
+                        onDragLeave={() => dragLeave()}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -391,7 +399,7 @@ export default function Home() {
                       </div>
                     </div>
                     {tour["Z"].customers.length > 0 ? (
-                      <div className="rounded-sm m-1 dark:bg-gray-800 bg-gray-100">
+                      <div onDragLeave={() => dragLeave()} onDragEnter={() => dragCounter.current++} onDragOver={(e) => e.preventDefault()} className="rounded-sm m-1 dark:bg-gray-800 bg-gray-100">
                         <div className=" text-lg text-center text-nowrap">
                           Not assigned
                         </div>
@@ -401,16 +409,15 @@ export default function Home() {
                               <div
                                 key={"unassigned-" + index}
                                 className="h-20 bg-gray-50 dark:bg-gray-800"
-                                onDragEnd={() => {
-                                  dropItem(index, dragTo, "Z", dragOverGroup);
-                                }}
+                                onDragStart={(e) => dragStart(e, index, "Z")}
+                                onDragOver={(e) => e.preventDefault()}
                                 draggable
                               >
                                 <CardComponent
                                   customer={customer}
                                   index={index}
                                   group={"Z"}
-                                  dropItem={dropItem}
+                                  dropItem={moveItem}
                                 />
                               </div>
                             );

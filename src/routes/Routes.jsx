@@ -52,7 +52,11 @@ const Routes = () => {
         },
         {
           path: "customer-search",
-          element: <Search />,
+          element: (
+            <TourProvider>
+              <Search />
+            </TourProvider>
+            ),
         },
         {
           path: "/logout",
