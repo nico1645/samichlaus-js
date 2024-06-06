@@ -5,7 +5,7 @@ export const COLOR_DICT = {
   D: "red",
   E: "lime",
   F: "purple",
-  G: "black",
+  G: "pink",
   Z: "black",
 };
 export const GROUP_DICT = { A: 0, B: 1, C: 2, D: 3, E: 4, F: 5, G: 6 };
@@ -132,6 +132,6 @@ export const getVisitTime = (children, seniors) => {
         time += seniorMap[seniors];
     else
         time += 40;
-    console.log("time: " + time);
+    //console.log("time: " + time);
     return time
 }

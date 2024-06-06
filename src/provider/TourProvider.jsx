@@ -36,13 +36,14 @@ const ACTIONS = {
   setSamichlausGroupName: "setSamichlausGroupName",
   removeCustomer: "removeCustomer",
   addTime: "addTime",
+  updateTime: "updateTime",
 };
 
 const _moveItem = (fromGroup, toGroup, fromIndex, toIndex, oldTour, newTour) => {
     const customer = { ...oldTour[fromGroup].customers[fromIndex] };
     const updateCustomers = [];
     const updateRoutes = [];
-    if (fromGroup === "Z") {
+    if (fromGroup === "Z" || (toGroup !== "Z" && fromGroup !== toGroup)) {
       const tmpStartTime = toIndex === newTour[toGroup].customers.length ? newTour[toGroup].customerEnd : newTour[toGroup].customers[toIndex].visitTime;
       customer.visitTime = tmpStartTime;
       const interval = getVisitTime(oldTour[fromGroup].customers[fromIndex].children, oldTour[fromGroup].customers[fromIndex].seniors);
@@ -76,6 +77,37 @@ const _moveItem = (fromGroup, toGroup, fromIndex, toIndex, oldTour, newTour) => 
         routeId: newTour[fromGroup].routeId,
         customerEnd: newTour[fromGroup].customerEnd,
       });
+    } else if (toGroup === fromGroup) {
+        if (fromIndex < toIndex) {
+            const newToIndex = toIndex === newTour[toGroup].customers.length ? toIndex - 1 : toIndex;
+            const tmpStartTime = newToIndex+1 >= newTour[toGroup].customers.length ? newTour[toGroup].customerEnd : newTour[toGroup].customers[toIndex+1].visitTime;
+            const interval = fromIndex === newTour[fromGroup].customers.length - 1 ? getAbsMinuteDifference(customer.visitTime, newTour[fromGroup].customerEnd) : getAbsMinuteDifference(customer.visitTime, newTour[fromGroup].customers[fromIndex + 1].visitTime);
+            newTour[fromGroup].customers.splice(fromIndex, 1);
+            newTour[toGroup].customers.splice(toIndex, 0, customer);
+            newTour[toGroup].customers[newToIndex].visitTime = addMinutesToTime(tmpStartTime, -interval);
+            for (let i = newToIndex-1; i >= fromIndex; i--) {
+              newTour[toGroup].customers[i].visitTime = addMinutesToTime(newTour[toGroup].customers[i].visitTime, -interval);
+              updateCustomers.push({
+                  customerId: newTour[toGroup].customers[i].customerId,
+                  visitTime: newTour[toGroup].customers[i].visitTime,
+              });
+            }
+        } else {
+            const tmpStartTime =  newTour[toGroup].customers[toIndex].visitTime;
+            const interval = fromIndex === newTour[fromGroup].customers.length - 1 ? getAbsMinuteDifference(customer.visitTime, newTour[fromGroup].customerEnd) : getAbsMinuteDifference(customer.visitTime, newTour[fromGroup].customers[fromIndex + 1].visitTime);
+            newTour[fromGroup].customers.splice(fromIndex, 1);
+            newTour[toGroup].customers.splice(toIndex, 0, customer);
+            newTour[toGroup].customers[toIndex].visitTime = tmpStartTime;
+            for (let i = toIndex+1; i <= fromIndex; i++) {
+              newTour[toGroup].customers[i].visitTime = addMinutesToTime(newTour[toGroup].customers[i].visitTime, interval);
+              updateCustomers.push({
+                  customerId: newTour[toGroup].customers[i].customerId,
+                  visitTime: newTour[toGroup].customers[i].visitTime,
+              });
+            }
+        }
+    } else {
+        return oldTour;
     }
 
     if (toGroup === "Z")
@@ -331,7 +363,9 @@ const tourReducer = (state, action) => {
 
     case ACTIONS.moveItem:
       if (action.payload.fromGroup === action.payload.toGroup
-                && action.payload.fromIndex === action.payload.toIndex || action.payload.toGroup === "")
+                && action.payload.fromIndex === action.payload.toIndex || action.payload.toGroup === ""
+                || action.payload.fromGroup === action.payload.toGroup && action.payload.fromIndex + 1 === action.payload.toIndex
+                && action.payload.toIndex === state.tour[action.payload.fromGroup].customers.length)
         return state;
 
       return { ...state, 
@@ -428,6 +462,11 @@ const tourReducer = (state, action) => {
         );
       }
       return { ...state, tour: { ...state.tour }}
+    case ACTIONS.updateTime:
+        state.tour[action.payload.group].customerStart = action.payload.routeObj.startTime;
+        state.tour[action.payload.group].customerEnd = action.payload.routeObj.endTime;
+        state.tour[action.payload.group].customers.forEach((c, i) => c.visitTime = action.payload.routeObj.customers[i].visitTime)
+        return { ...state, tour: { ...state.tour } };
 
 
     default:
@@ -517,6 +556,13 @@ const TourProvider = ({ children }) => {
     });
   };
 
+  const updateTime = (group, routeObj) => {
+    dispatch({
+      type: ACTIONS.updateTime,
+      payload: { group: group, routeObj: routeObj },
+    });
+  }
+
   // Memoized value of the tour context
   const contextValue = useMemo(
     () => ({
@@ -532,6 +578,7 @@ const TourProvider = ({ children }) => {
       setTourDate,
       removeCustomer,
       addTime,
+      updateTime,
     }),
     [state]
   );

@@ -217,3 +217,14 @@ export const updateManyRoutes = (succCallback, errCallback, data) => {
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
 };
+
+export const updateRouteTime = (succCallback, errCallback, data) => {
+  axios
+    .post(`${import.meta.env.VITE_APP_BACKEND_URL}api/v1/routing/route`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res) => succCallback(res))
+    .catch((err) => errCallback(err));
+}

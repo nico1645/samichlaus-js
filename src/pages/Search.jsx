@@ -110,7 +110,7 @@ export default function Search() {
               options={yearOption}
             />
                 <input
-                    className="h-9 p-2 text-black rounded-md"
+                    className="h-9 p-2 text-black rounded-md border border-gray-300"
                     placeholder="Search"
                     onChange={filterCustomers}
                 />

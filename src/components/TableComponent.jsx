@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { getAbsMinuteDifference } from "../constants/Constants.js";
+import { getAbsMinuteDifference, DEPOT } from "../constants/Constants.js";
 import { useTour } from "../provider/TourProvider";
+import { updateRouteTime } from "../utils/utils.js";
 const TableComponent = ({ route, group, nameRef }) => {
   const [senior, setSenior] = useState();
   const [children, setChildren] = useState(0);
-  const { addTime } = useTour();
+  const { addTime, updateTime } = useTour();
 
   useEffect(() => {
     let s = 0;
@@ -49,14 +50,42 @@ const TableComponent = ({ route, group, nameRef }) => {
       ));
   };
 
+  const handleUpdateTime = () => {
+    console.log("test send");
+    const data = {
+        depot: DEPOT,
+        startTime: route.customerStart,
+        customers: route.customers,
+        endTime: route.customerEnd,
+    }
+    data.customers.forEach((c) => {
+        c.address.rayon = c.address.rayon - 1;
+        c.visitRayon = c.visitRayon - 1;
+    })
+    updateRouteTime((res) => {
+        const data = res.data;
+        updateTime(group, data);
+    },
+    () => {},
+    data
+    );
+
+  };
+
   return (
-    <div className="w-full p-4">
+    <div className=" p-4">
       <div className="bg-white h-full border border-gray-200 rounded-md shadow-md p-4 dark:bg-gray-800 dark:border-black">
         {/* Table Header */}
         <div className="flex justify-between mb-4">
           <div>
             <span className="font-semibold mr-2">Gruppe {group}</span>
           </div>
+          <button
+              className="p-2 rounded-lg bg-primary-600 hover:bg-primary-800 text-white select-none"
+              onClick={() => handleUpdateTime()}
+          >
+          Update Time
+          </button>
           <div className="font-semibold mr-2">
             Start Time: {route.customerStart.slice(0, 5)}
           </div>
@@ -148,7 +177,7 @@ const TableComponent = ({ route, group, nameRef }) => {
                 <td className="border text-center">
                   <input
                     id={"start-time-" + group}
-                    className="text-black rounded-md px-1 mx-auto"
+                    className="text-black border-gray-300 border rounded-md px-1 mx-auto"
                     type="number"
                     value={
                       route.customers.length > 0
@@ -197,7 +226,7 @@ const TableComponent = ({ route, group, nameRef }) => {
                     <td className="text-nowrap border text-center">
                       <input
                         id={"time-intervall-" + group + index}
-                        className="text-black rounded-md px-1 mx-auto"
+                        className="text-black border-gray-300 border rounded-md px-1 mx-auto"
                         type="number"
                         value={value}
                         onChange={(e) => handleTimeChange(e, index)}

@@ -102,7 +102,7 @@ export default function Home() {
     });
     const newLayerGroup = [];
     for (let i = 0; i < numOfGroups + 1; i++) {
-      if ((!group || !dragOverGroup) && numOfGroups > 0) {
+      if (!group && numOfGroups > 0) {
         setGroup("A");
       }
       const polyline = [];
@@ -203,7 +203,7 @@ export default function Home() {
 
   const drop = (e) => {
         console.log("from: " + e.dataTransfer.getData("fromIndex")+ " to: " + dragTo + " fromGroup: " + e.dataTransfer.getData("fromGroup")+ " toGroup: " + dragOverGroup);
-        moveItem(e.dataTransfer.getData("fromIndex"), dragTo, e.dataTransfer.getData("fromGroup"), dragOverGroup);
+        moveItem(parseInt(e.dataTransfer.getData("fromIndex")), dragTo, e.dataTransfer.getData("fromGroup"), dragOverGroup);
     }
 
   const dragStart = (e, fromIndex, fromGroup) => {
@@ -291,8 +291,8 @@ export default function Home() {
                 </div>
               </div>
               {group ? (
-                <div className="flex flex-col overflow-y-hidden md:overflow-auto lg:flex-row">
-                  <div className="overflow-y-scroll lg:h-[calc(100vh-64px)] md:max-h-[calc(100vh-300px)] md:max-h-1/2 lg:w-1/2 max-h-[calc(50vh-64px)]">
+                <div className="flex flex-col h-[40vh] md:h-[92vh] overflow-y-hidden md:overflow-auto lg:flex-row">
+                  <div className="overflow-y-auto md:max-h-1/2 lg:w-1/2">
                     {tour[group].customers.map((customer, i) => {
                       return (
                         <div
@@ -380,6 +380,7 @@ export default function Home() {
                             className="dark:text-black border border-black rounded-md"
                             name="visit-date"
                             type="date"
+                            onKeyDown={(e) => e.preventDefault()}
                             min={date.slice(0, 4) + "-01-01"}
                             max={date.slice(0, 4) + "-12-31"}
                             value={date}
@@ -391,6 +392,7 @@ export default function Home() {
                           <input
                             className="dark:text-black border border-black rounded-md"
                             name="visit-time"
+                            onKeyDown={(e) => e.preventDefault()}
                             type="time"
                             value={tour[group].customerStart.slice(0, 5)}
                             onChange={(e) => changeGroupStartTime(e)}
