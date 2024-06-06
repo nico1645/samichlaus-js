@@ -79,8 +79,8 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     onClose();
   };
 
-  const revert = () => {};
-  const commit = () => {};
+  //const revert = () => {};
+  //const commit = () => {};
 
   const handleCalculateTour = () => {
     if (maxSeconds < 1 || maxSeconds > 900) {

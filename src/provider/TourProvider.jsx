@@ -2,7 +2,6 @@ import { createContext, useContext, useMemo, useReducer } from "react";
 import {
   GROUP_DICT,
   GROUP_LIST,
-  MAX_GROUPS,
   route_comparator,
   route_comparator_address,
   addMinutesToTime,
@@ -11,7 +10,6 @@ import {
   getVisitTime,
 } from "../constants/Constants";
 import {
-  createRoute,
   deleteCustomer,
   deleteRoute,
   putTour,
@@ -37,9 +35,11 @@ const ACTIONS = {
   removeCustomer: "removeCustomer",
   addTime: "addTime",
   updateTime: "updateTime",
+  addNewCustomer: "addNewCustomer",
+  setError: "setError",
 };
 
-const _moveItem = (fromGroup, toGroup, fromIndex, toIndex, oldTour, newTour) => {
+const _moveItem = (fromGroup, toGroup, fromIndex, toIndex, oldTour, newTour, errCallback) => {
     const customer = { ...oldTour[fromGroup].customers[fromIndex] };
     const updateCustomers = [];
     const updateRoutes = [];
@@ -122,26 +122,26 @@ const _moveItem = (fromGroup, toGroup, fromIndex, toIndex, oldTour, newTour) => 
     if (updateRoutes.length > 0)
         updateManyRoutes(
             () => {},
-            () => {},
+            errCallback,
             updateRoutes
         );
 
     updateManyCustomers(
       () => {},
-      () => {},
+      errCallback,
       updateCustomers
     );
 
     return newTour;
 }
 
-const _setGroupStartTime = (tour, group, startTime) => {
+const _setGroupStartTime = (tour, group, startTime, errCallback) => {
   const updateCustomerData = [];
   const absMinuteDiff = getAbsMinuteDifference(startTime, tour[group].customerStart);
   const newCustomerEnd = addMinutesToTime(tour[group].customerEnd, absMinuteDiff);
   tour[group].customerStart = startTime;
   tour[group].customerEnd = newCustomerEnd;
-  updateRoute(() => {}, () => {}, {
+  updateRoute(() => {}, errCallback, {
     routeId: tour[group].routeId,
     customerStart: startTime,
     customerEnd: newCustomerEnd,
@@ -156,13 +156,13 @@ const _setGroupStartTime = (tour, group, startTime) => {
   })
   updateManyCustomers(
     () => {},
-    () => {},
+    errCallback,
     updateCustomerData
   );
   return tour;
 }
 
-const _reverseGroup = (group, tour) => {
+const _reverseGroup = (group, tour, errCallback) => {
     const updateCustomerData = [];
     var currentTime = tour[group].customerStart;
     var time;
@@ -193,11 +193,12 @@ const _reverseGroup = (group, tour) => {
 
     updateManyCustomers(
       () => {},
-      () => {},
+      errCallback,
       updateCustomerData
     );
     return tour;
 }
+
 
 // Reducer function to handle authentication state changes
 const tourReducer = (state, action) => {
@@ -237,11 +238,11 @@ const tourReducer = (state, action) => {
           () => {
             deleteRoute(
               () => {},
-              () => {},
+              action.payload.errCallback,
               routeId
             );
           },
-          () => {},
+          action.payload.errCallback,
           customerUpdateData
         );
         delete updatedTour[action.payload];
@@ -282,15 +283,15 @@ const tourReducer = (state, action) => {
               () => {
                 deleteRoute(
                   () => {},
-                  () => {},
+                  action.payload.errCallback,
                   routeId
                 );
               },
-              () => {},
+              action.payload.errCallback,
               customerUpdateData
             );
           },
-          () => {},
+          action.payload.errCallback,
           updateRouteData
         );
 
@@ -316,7 +317,6 @@ const tourReducer = (state, action) => {
       const tour = action.payload.tour;
       localStorage.setItem("rayon", tour.rayon.toString());
       localStorage.setItem("year", tour.year.toString());
-      console.log(tour);
       const newState = {
         tour: {},
         numOfGroups: tour.routes.length - 1,
@@ -375,24 +375,25 @@ const tourReducer = (state, action) => {
                 action.payload.fromIndex, 
                 action.payload.toIndex, 
                 state.tour, 
-                { ...state.tour }) 
+                { ...state.tour },
+                action.payload.errCallback) 
             };
 
     case ACTIONS.setGroupStartTime:
       
-      return { ...state, tour: { ..._setGroupStartTime(state.tour, action.payload.group, action.payload.date) } };
+      return { ...state, tour: { ..._setGroupStartTime(state.tour, action.payload.group, action.payload.date, action.payload.errCallback) } };
 
     case ACTIONS.setTourDate:
       putTour(
         () => {},
-        () => {},
+        action.payload.errCallback,
         { date: action.payload.date },
         state.tourId
       );
       return { ...state, date: action.payload.date };
 
     case ACTIONS.reverseGroup:
-      return { ...state, tour: { ..._reverseGroup(action.payload.group, state.tour) } };
+      return { ...state, tour: { ..._reverseGroup(action.payload.group, state.tour, action.payload.errCallback) } };
 
     case ACTIONS.setSamichlausGroupName:
       const updateRouteNameDate = [];
@@ -421,7 +422,7 @@ const tourReducer = (state, action) => {
       }
       updateManyRoutes(
         () => {},
-        () => {},
+        action.payload.errCallback,
         updateRouteNameDate
       );
 
@@ -430,19 +431,17 @@ const tourReducer = (state, action) => {
     case ACTIONS.removeCustomer:
       deleteCustomer(
         () => {},
-        () => {},
+        action.payload.errCallback,
         action.payload.uuid
       );
       state.tour["Z"].customers.splice(action.payload.index, 1);
       return { ...state, tour: { ...state.tour } };
 
     case ACTIONS.addTime:
-      const addValue = action.payload.value;
-      //console.log("Index:" + action.payload.index +" Group:" + action.payload.group + " Value: " + addValue);
       if (action.payload.index === -1) {
         state.tour[action.payload.group].customerEnd = addMinutesToTime(
           state.tour[action.payload.group].customerEnd,
-          addValue
+          action.payload.value
         );
       } else {
         for (
@@ -450,15 +449,14 @@ const tourReducer = (state, action) => {
           i < state.tour[action.payload.group].customers.length;
           i++
         ) {
-          //console.log(i + " " + state.tour[action.payload.group].customers.length);
           state.tour[action.payload.group].customers[i].visitTime = addMinutesToTime(
             state.tour[action.payload.group].customers[i].visitTime,
-            addValue
+            action.payload.value
           );
         }
         state.tour[action.payload.group].customerEnd = addMinutesToTime(
           state.tour[action.payload.group].customerEnd,
-          addValue
+          action.payload.value
         );
       }
       return { ...state, tour: { ...state.tour }}
@@ -467,6 +465,13 @@ const tourReducer = (state, action) => {
         state.tour[action.payload.group].customerEnd = action.payload.routeObj.endTime;
         state.tour[action.payload.group].customers.forEach((c, i) => c.visitTime = action.payload.routeObj.customers[i].visitTime)
         return { ...state, tour: { ...state.tour } };
+
+    case ACTIONS.addNewCustomer:
+        state.tour[action.payload.group].customers.push(action.payload.customer);
+        return { ...state, tour: { ...state.tour } };
+
+    case ACTIONS.setError:
+        return { ...state, errorBool: action.payload.errorBool, error: action.payload.error };
 
 
     default:
@@ -487,17 +492,19 @@ const initialData = {
     : new Date().getFullYear(),
   date: new Date().toLocaleDateString(),
   tourId: "",
+  error: "",
+  errorBool: false,
 };
 
 const TourProvider = ({ children }) => {
   const [state, dispatch] = useReducer(tourReducer, initialData);
 
   const addNewGroup = (route) => {
-    dispatch({ type: ACTIONS.addNewGroup, payload: { route: route } });
+    dispatch({ type: ACTIONS.addNewGroup, payload: { route: route, errCallback: _errCallback } });
   };
 
   const removeGroup = (group) => {
-    dispatch({ type: ACTIONS.removeGroup, payload: group });
+    dispatch({ type: ACTIONS.removeGroup, payload: group, errCallback: _errCallback });
   };
 
   const setRayonYear = (year, rayon) => {
@@ -508,7 +515,7 @@ const TourProvider = ({ children }) => {
   };
 
   const reverseGroup = (group) => {
-    dispatch({ type: ACTIONS.reverseGroup, payload: { group: group } });
+    dispatch({ type: ACTIONS.reverseGroup, payload: { group: group, errCallback: _errCallback } });
   };
 
   const setNewTour = (tour) => {
@@ -523,7 +530,7 @@ const TourProvider = ({ children }) => {
   };
 
   const setTourDate = (date) => {
-    dispatch({ type: ACTIONS.setTourDate, payload: { date: date } });
+    dispatch({ type: ACTIONS.setTourDate, payload: { date: date, errCallback: _errCallback } });
   };
 
   const moveItem = (fromIndex, toIndex, fromGroup, toGroup) => {
@@ -534,18 +541,19 @@ const TourProvider = ({ children }) => {
         toIndex: toIndex,
         fromGroup: fromGroup,
         toGroup: toGroup,
+        errCallback: _errCallback,
       },
     });
   };
 
   const setSamichlausGroupName = (values) => {
-    dispatch({ type: ACTIONS.setSamichlausGroupName, payload: values });
+    dispatch({ type: ACTIONS.setSamichlausGroupName, payload: values, errCallback: _errCallback });
   };
 
   const removeCustomer = (index, uuid) => {
     dispatch({
       type: ACTIONS.removeCustomer,
-      payload: { index: index, uuid: uuid },
+      payload: { index: index, uuid: uuid, errCallback: _errCallback },
     });
   };
 
@@ -561,6 +569,32 @@ const TourProvider = ({ children }) => {
       type: ACTIONS.updateTime,
       payload: { group: group, routeObj: routeObj },
     });
+  }
+
+  const addNewCustomer = (group, customer) => {
+    dispatch({
+      type: ACTIONS.addNewCustomer,
+      payload: { group: group, customer: customer },
+    });
+  }
+
+  const setError = (error, errorBool) => {
+    dispatch({
+      type: ACTIONS.setError,
+      payload: { error: error, errorBool: errorBool },
+    });
+  }
+
+  const _errCallback = (err) => {
+    if (err.response) {
+      setError(
+        "Error (" + err.response.status + "): " + err.response.data.message, true
+      );
+    } else if (err.request) {
+      setError("Unexpected Error: " + err.message, true);
+    } else {
+      setError("Unexpected Error: " + err.message, true);
+    }
   }
 
   // Memoized value of the tour context
@@ -579,6 +613,8 @@ const TourProvider = ({ children }) => {
       removeCustomer,
       addTime,
       updateTime,
+      addNewCustomer,
+      setError,
     }),
     [state]
   );

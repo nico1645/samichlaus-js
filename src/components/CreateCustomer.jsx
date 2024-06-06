@@ -14,7 +14,7 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
   const [children, setChildren] = useState(0);
   const [seniors, setSeniors] = useState(0);
   const [visitRayon, setVisitRayon] = useState(1);
-  const { year, rayon } = useTour();
+  const { year, rayon, addNewCustomer } = useTour();
   const [visitYear, setVisitYear] = useState(year);
   const navigate = useNavigate();
 
@@ -42,7 +42,7 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
   }, [isOpen]);
 
 
-  const reset = (e) => {
+  const reset = () => {
     setErrorBool(false);
     setSelectedAddress(null);
     setFirstName("");
@@ -68,8 +68,9 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
     setErrorBool(true);
   };
 
-  const createCustomerSuccCallback = () => {
-    if (visitYear === year && visitRayon === rayon) navigate(0);
+  const createCustomerSuccCallback = (res) => {
+    console.log(res);
+    addNewCustomer("Z", res.data);
     reset();
   };
 

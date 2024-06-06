@@ -13,6 +13,7 @@ import GroupButtons from "../components/GroupButtons";
 import Sidebar from "../components/Sidebar";
 import CardComponent from "../components/CardComponent";
 import TableComponent from "../components/TableComponent";
+import Error from "../components/Error.jsx";
 import { updateManyCustomers } from "../utils/utils";
 
 export default function Home() {
@@ -33,6 +34,9 @@ export default function Home() {
     reverseGroup,
     setSamichlausGroupName,
     setTourDate,
+    errorBool,
+    error,
+    setError,
   } = useTour();
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
@@ -161,6 +165,10 @@ export default function Home() {
     setIsSettingsOpen(false);
   };
 
+  const onCloseError = () => {
+    setError("", false);
+  };
+
   const saveSamichlausGroupNames = () => {
     if (isTableMode) {
       const values = {};
@@ -202,7 +210,6 @@ export default function Home() {
   }
 
   const drop = (e) => {
-        console.log("from: " + e.dataTransfer.getData("fromIndex")+ " to: " + dragTo + " fromGroup: " + e.dataTransfer.getData("fromGroup")+ " toGroup: " + dragOverGroup);
         moveItem(parseInt(e.dataTransfer.getData("fromIndex")), dragTo, e.dataTransfer.getData("fromGroup"), dragOverGroup);
     }
 
@@ -224,6 +231,11 @@ export default function Home() {
       <CreateCustomer
         isOpen={isCreateCustomerOpen}
         onClose={onCloseCreateCustomer}
+      />
+      <Error
+        isOpen={errorBool}
+        onClose={onCloseError}
+        error={error}
       />
       <Settings
         isOpen={isSettingsOpen}
