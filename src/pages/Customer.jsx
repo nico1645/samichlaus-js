@@ -25,7 +25,7 @@ export default function Customer() {
             },
           }
         )
-        .then((res) => {
+        .then(() => {
           navigate("/", { replace: true });
         })
         .catch((err) => {

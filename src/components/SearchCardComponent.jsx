@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
+import PropTypes from 'prop-types';
+
 export default function CardComponent({ customer }) {
-  const navigate = useNavigate();
 
   const getSeniorChildString = (children, seniors) => {
     if (children === 0 && seniors === 0) {
@@ -35,4 +35,8 @@ export default function CardComponent({ customer }) {
       </div>
     </div>
   );
+}
+
+CardComponent.propTypes = {
+    customer: PropTypes.object.isRequired,
 }

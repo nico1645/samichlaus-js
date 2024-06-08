@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PropTypes from 'prop-types';
 
 export default function Sidebar({ openSettings, openCreateCustomer}) {
 
@@ -115,3 +116,8 @@ export default function Sidebar({ openSettings, openCreateCustomer}) {
     </div>
   );
 }
+
+Sidebar.propTypes = {
+  openSettings: PropTypes.func.isRequired,
+  openCreateCustomer: PropTypes.func.isRequired,
+};

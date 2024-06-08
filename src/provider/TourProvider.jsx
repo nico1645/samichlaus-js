@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useReducer } from "react";
+import { createContext, useMemo, useReducer } from "react";
 import {
   GROUP_DICT,
   GROUP_LIST,
@@ -18,9 +18,10 @@ import {
   updateManyRoutes,
   updateRoute,
 } from "../utils/utils";
+import PropTypes from 'prop-types';
 
 // Create the authentication context
-const TourContext = createContext();
+export const TourContext = createContext();
 
 // Define the possible actions for the authReducer
 const ACTIONS = {
@@ -201,6 +202,115 @@ const _reverseGroup = (group, tour, errCallback) => {
     return tour;
 }
 
+const _removeGroup = (state, routeId, group, errCallback) => {
+  const customerUpdateData = [];
+  if (state.numOfGroups === GROUP_DICT[group] + 1) {
+    const updatedTour = { ...state.tour };
+    updatedTour[group].customers.forEach((customer) => {
+      updatedTour["Z"].customers.push(customer);
+      customerUpdateData.push({
+        customerId: customer.customerId,
+        routeId: updatedTour["Z"].routeId,
+      });
+    });
+    updatedTour["Z"].customers.sort(route_comparator_address)
+    updateManyCustomers(
+      () => {
+        deleteRoute(
+          () => {},
+          errCallback,
+          routeId
+        );
+      },
+      errCallback,
+      customerUpdateData
+    );
+    delete updatedTour[group];
+    return updatedTour;
+  } else {
+    const updatedTour = { ...state.tour };
+    const updateRouteData = [];
+    updatedTour[group].customers.forEach((customer) => {
+      updatedTour["Z"].customers.push(customer);
+      customerUpdateData.push({
+        customerId: customer.customerId,
+        routeId: updatedTour["Z"].routeId,
+      });
+    });
+    updatedTour["Z"].customers.sort(route_comparator_address)
+    for (
+      let i = GROUP_DICT[group];
+      i < state.numOfGroups - 1;
+      i++
+    ) {
+      const currentGroup = GROUP_LIST[i];
+      const nextGroup = GROUP_LIST[i + 1];
+
+      updateRouteData.push({
+        routeId: updatedTour[nextGroup].routeId,
+        group: currentGroup,
+      });
+
+      updatedTour[currentGroup] = state.tour[nextGroup];
+    }
+
+    updateManyRoutes(
+      () => {
+        updateManyCustomers(
+          () => {
+            deleteRoute(
+              () => {},
+              errCallback,
+              routeId
+            );
+          },
+          errCallback,
+          customerUpdateData
+        );
+      },
+      errCallback,
+      updateRouteData
+    );
+
+    delete updatedTour[GROUP_LIST[state.numOfGroups - 1]];
+
+    return updatedTour;
+  }
+};
+
+const _setSamichlausGroupName = (state, obj, errCallback) => {
+  const updateRouteNameDate = [];
+  for (let i = 0; i < state.numOfGroups; i++) {
+    state.tour[GROUP_LIST[i]].samichlaus =
+      obj[GROUP_LIST[i] + "samichlaus"];
+    state.tour[GROUP_LIST[i]].ruprecht =
+      obj[GROUP_LIST[i] + "ruprecht"];
+    state.tour[GROUP_LIST[i]].schmutzli =
+      obj[GROUP_LIST[i] + "schmutzli"];
+    state.tour[GROUP_LIST[i]].engel1 =
+      obj[GROUP_LIST[i] + "engel1"];
+    state.tour[GROUP_LIST[i]].engel2 =
+      obj[GROUP_LIST[i] + "engel2"];
+
+    updateRouteNameDate.push({
+      routeId: state.tour[GROUP_LIST[i]].routeId,
+      samichlaus: state.tour[GROUP_LIST[i]].samichlaus,
+      ruprecht: state.tour[GROUP_LIST[i]].ruprecht,
+      schmutzli: state.tour[GROUP_LIST[i]].schmutzli,
+      engel1: state.tour[GROUP_LIST[i]].engel1,
+      engel2: state.tour[GROUP_LIST[i]].engel2,
+      customerStart: state.tour[GROUP_LIST[i]].customerStart,
+      customerEnd: state.tour[GROUP_LIST[i]].customerEnd,
+    });
+  }
+  updateManyRoutes(
+    () => {},
+    errCallback,
+    updateRouteNameDate
+  );
+  return state.tour;
+}
+
 
 // Reducer function to handle authentication state changes
 const tourReducer = (state, action) => {
@@ -225,86 +335,11 @@ const tourReducer = (state, action) => {
             numOfGroups: state.numOfGroups + 1,
           };
     case ACTIONS.removeGroup:
-      const customerUpdateData = [];
-      const routeId = state.tour[action.payload].routeId;
-      if (state.numOfGroups === GROUP_DICT[action.payload] + 1) {
-        const updatedTour = { ...state.tour };
-        updatedTour[action.payload].customers.forEach((customer) => {
-          updatedTour["Z"].customers.push(customer);
-          customerUpdateData.push({
-            customerId: customer.customerId,
-            routeId: updatedTour["Z"].routeId,
-          });
-        });
-        updateManyCustomers(
-          () => {
-            deleteRoute(
-              () => {},
-              action.payload.errCallback,
-              routeId
-            );
-          },
-          action.payload.errCallback,
-          customerUpdateData
-        );
-        delete updatedTour[action.payload];
         return {
           ...state,
-          tour: updatedTour,
+          tour: _removeGroup(state, state.tour[action.payload].routeId, action.payload, action.payload.errCallback),
           numOfGroups: state.numOfGroups - 1,
         };
-      } else {
-        const updatedTour = { ...state.tour };
-        const updateRouteData = [];
-        updatedTour[action.payload].customers.forEach((customer) => {
-          updatedTour["Z"].customers.push(customer);
-          customerUpdateData.push({
-            customerId: customer.customerId,
-            routeId: updatedTour["Z"].routeId,
-          });
-        });
-        for (
-          let i = GROUP_DICT[action.payload];
-          i < state.numOfGroups - 1;
-          i++
-        ) {
-          const currentGroup = GROUP_LIST[i];
-          const nextGroup = GROUP_LIST[i + 1];
-
-          updateRouteData.push({
-            routeId: updatedTour[nextGroup].routeId,
-            group: currentGroup,
-          });
-
-          updatedTour[currentGroup] = state.tour[nextGroup];
-        }
-
-        updateManyRoutes(
-          () => {
-            updateManyCustomers(
-              () => {
-                deleteRoute(
-                  () => {},
-                  action.payload.errCallback,
-                  routeId
-                );
-              },
-              action.payload.errCallback,
-              customerUpdateData
-            );
-          },
-          action.payload.errCallback,
-          updateRouteData
-        );
-
-        delete updatedTour[GROUP_LIST[state.numOfGroups - 1]];
-
-        return {
-          ...state,
-          tour: updatedTour,
-          numOfGroups: state.numOfGroups - 1,
-        };
-      }
 
     case ACTIONS.setRayonYear:
       localStorage.setItem("rayon", action.payload.rayon.toString());
@@ -316,28 +351,25 @@ const tourReducer = (state, action) => {
       };
 
     case ACTIONS.setNewTour:
-      const tour = action.payload.tour;
-      localStorage.setItem("rayon", tour.rayon.toString());
-      localStorage.setItem("year", tour.year.toString());
-      const newState = {
-        tour: {},
-        numOfGroups: tour.routes.length - 1,
-        year: tour.year,
-        rayon: tour.rayon,
-        date: tour.date,
-        tourId: tour.tourId,
-      };
+      localStorage.setItem("rayon", action.payload.tour.rayon.toString());
+      localStorage.setItem("year", action.payload.tour.year.toString());
+      state.tour = {};
+      state.numOfGroups = action.payload.tour.routes.length - 1;
+      state.year = action.payload.tour.year;
+      state.rayon = action.payload.tour.rayon;
+      state.date = action.payload.tour.date;
+      state.tourId = action.payload.tour.tourId;
 
-      tour.routes.sort(route_comparator_group);
+      action.payload.tour.routes.sort(route_comparator_group);
 
-      tour.routes.map((route) => {
+      action.payload.tour.routes.map((route) => {
         const customers = [];
         route.customers.forEach((c) => {
           customers.push(c);
         });
         if (route.group === "Z") customers.sort(route_comparator_address);
         else customers.sort(route_comparator);
-        newState.tour = Object.assign({}, newState.tour, {
+        state.tour = Object.assign({}, state.tour, {
           [route.group]: {
             routeId: route.routeId,
             customers: customers,
@@ -355,12 +387,6 @@ const tourReducer = (state, action) => {
 
       return {
         ...state,
-        rayon: newState.rayon,
-        year: newState.year,
-        tour: newState.tour,
-        numOfGroups: newState.numOfGroups,
-        date: newState.date,
-        tourId: newState.tourId,
       };
 
     case ACTIONS.moveItem:
@@ -398,37 +424,8 @@ const tourReducer = (state, action) => {
       return { ...state, tour: { ..._reverseGroup(action.payload.group, state.tour, action.payload.errCallback) } };
 
     case ACTIONS.setSamichlausGroupName:
-      const updateRouteNameDate = [];
-      for (let i = 0; i < state.numOfGroups; i++) {
-        state.tour[GROUP_LIST[i]].samichlaus =
-          action.payload[GROUP_LIST[i] + "samichlaus"];
-        state.tour[GROUP_LIST[i]].ruprecht =
-          action.payload[GROUP_LIST[i] + "ruprecht"];
-        state.tour[GROUP_LIST[i]].schmutzli =
-          action.payload[GROUP_LIST[i] + "schmutzli"];
-        state.tour[GROUP_LIST[i]].engel1 =
-          action.payload[GROUP_LIST[i] + "engel1"];
-        state.tour[GROUP_LIST[i]].engel2 =
-          action.payload[GROUP_LIST[i] + "engel2"];
 
-        updateRouteNameDate.push({
-          routeId: state.tour[GROUP_LIST[i]].routeId,
-          samichlaus: state.tour[GROUP_LIST[i]].samichlaus,
-          ruprecht: state.tour[GROUP_LIST[i]].ruprecht,
-          schmutzli: state.tour[GROUP_LIST[i]].schmutzli,
-          engel1: state.tour[GROUP_LIST[i]].engel1,
-          engel2: state.tour[GROUP_LIST[i]].engel2,
-          customerStart: state.tour[GROUP_LIST[i]].customerStart,
-          customerEnd: state.tour[GROUP_LIST[i]].customerEnd,
-        });
-      }
-      updateManyRoutes(
-        () => {},
-        action.payload.errCallback,
-        updateRouteNameDate
-      );
-
-      return { ...state, tour: { ...state.tour } };
+      return { ...state, tour: { ..._setSamichlausGroupName(state, action.payload, action.payload.errCallback) } };
 
     case ACTIONS.removeCustomer:
       deleteCustomer(
@@ -618,6 +615,7 @@ const TourProvider = ({ children }) => {
       addNewCustomer,
       setError,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [state]
   );
 
@@ -626,9 +624,9 @@ const TourProvider = ({ children }) => {
   );
 };
 
-// Custom hook to easily access the authentication context
-export const useTour = () => {
-  return useContext(TourContext);
+TourProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
+
 
 export default TourProvider;

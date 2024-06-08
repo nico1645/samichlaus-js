@@ -8,7 +8,7 @@ import {
   LEAFLET_SETTINGS,
 } from "../constants/Constants";
 import Settings from "../components/Settings";
-import { useTour } from "../provider/TourProvider";
+import useTour from "../provider/Tour";
 import GroupButtons from "../components/GroupButtons";
 import Sidebar from "../components/Sidebar";
 import CardComponent from "../components/CardComponent";
@@ -96,6 +96,7 @@ export default function Home() {
   useEffect(() => {
     if (!map || !tour) return;
     renderAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tour]);
 
   const renderAll = () => {

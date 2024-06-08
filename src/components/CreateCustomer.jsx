@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import AsyncSelect from "react-select/async";
 import { useNavigate } from "react-router-dom";
-import { useTour } from "../provider/TourProvider";
+import useTour from "../provider/Tour";
 import { getAddressesContaining, postCreateCustomer } from "../utils/utils";
+import PropTypes from 'prop-types';
 
 export default function CreateCustomer({ isOpen, onClose, customer }) {
   const modal = useRef(null);
@@ -14,7 +15,7 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
   const [children, setChildren] = useState(0);
   const [seniors, setSeniors] = useState(0);
   const [visitRayon, setVisitRayon] = useState(1);
-  const { year, rayon, addNewCustomer } = useTour();
+  const { year, addNewCustomer } = useTour();
   const [visitYear, setVisitYear] = useState(year);
   const navigate = useNavigate();
 
@@ -39,6 +40,7 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
         modal.current.close();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
 
@@ -242,3 +244,9 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
     </dialog>
   );
 }
+
+CreateCustomer.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  customer: PropTypes.object,
+};

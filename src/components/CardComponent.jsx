@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useTour } from "../provider/TourProvider";
+import useTour from "../provider/Tour";
+import PropTypes from 'prop-types';
+
 export default function CardComponent({ customer, index, group, dropItem }) {
   const navigate = useNavigate();
   const { removeCustomer } = useTour();
@@ -81,4 +83,11 @@ export default function CardComponent({ customer, index, group, dropItem }) {
       </div>
     </div>
   );
+}
+
+CardComponent.propTypes = {
+    customer: PropTypes.object.isRequired,
+    index: PropTypes.number.isRequired,
+    group: PropTypes.string.isRequired,
+    dropItem: PropTypes.func.isRequired,
 }

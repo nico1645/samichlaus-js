@@ -63,6 +63,7 @@ export default function CustomerEdit() {
 
   useEffect(() => {
     getCustomer(customerSuccCallback, errCallback, uuid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = (e) => {

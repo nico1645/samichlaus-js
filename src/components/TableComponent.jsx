@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getAbsMinuteDifference, DEPOT } from "../constants/Constants.js";
-import { useTour } from "../provider/TourProvider";
+import useTour from "../provider/Tour";
 import { updateRouteTime } from "../utils/utils.js";
+import PropTypes from 'prop-types';
 const TableComponent = ({ route, group, nameRef }) => {
   const [senior, setSenior] = useState();
   const [children, setChildren] = useState(0);
@@ -252,6 +253,12 @@ const TableComponent = ({ route, group, nameRef }) => {
       </div>
     </div>
   );
+};
+
+TableComponent.propTypes = {
+  route: PropTypes.object.isRequired,
+  group: PropTypes.string.isRequired,
+  nameRef: PropTypes.object.isRequired,
 };
 
 export default TableComponent;

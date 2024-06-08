@@ -15,8 +15,8 @@ export default {
   },
   plugins: [],
   safelist: [
-    ...Object.values(COLOR_DICT).map((val, i) => `border-${val}-400`),
-    ...Object.values(COLOR_DICT).map((val, i) => `border-${val}-200`)
+    ...Object.values(COLOR_DICT).map((val) => `border-${val}-400`),
+    ...Object.values(COLOR_DICT).map((val) => `border-${val}-200`)
   ]
 }
 

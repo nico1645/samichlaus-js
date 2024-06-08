@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import { RAYON_OPTIONS, MAX_GROUPS } from "../constants/Constants";
-import { useTour } from "../provider/TourProvider";
+import useTour from "../provider/Tour";
 import { getExcel, getTour, getYears, postCalculateTour } from "../utils/utils";
+import PropTypes from 'prop-types';
 
 export default function Settings({ isOpen, onClose, setGroup }) {
   const modal = useRef(null);
@@ -52,10 +53,12 @@ export default function Settings({ isOpen, onClose, setGroup }) {
         modal.current.close();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   useEffect(() => {
     getYears(getYearsSuccCallback, errCallback);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getYearsSuccCallback = (res) => {
@@ -245,3 +248,9 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     </dialog>
   );
 }
+
+Settings.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  setGroup: PropTypes.func.isRequired,
+};

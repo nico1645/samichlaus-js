@@ -36,6 +36,7 @@ export default function Search() {
 
   useEffect(() => {
     getYears(getYearsSuccCallback, errCallback);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export default function Search() {
                 countSenior.current += c.seniors;
             })
         }, errCallback, selectedYearOption.value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYearOption]);
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export default function Search() {
     } else {
       setFilteredCustomers(customers)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSenior]);
 
   const getYearsSuccCallback = (res) => {

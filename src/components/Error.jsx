@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useTour } from "../provider/TourProvider";
+import useTour from "../provider/Tour";
+import PropTypes from 'prop-types';
 
 export default function Error({ isOpen, onClose }) {
   const modal = useRef(null);
@@ -37,3 +38,8 @@ export default function Error({ isOpen, onClose }) {
     </dialog>
   );
 }
+
+Error.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+};

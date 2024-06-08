@@ -6,8 +6,9 @@ import {
   GROUP_LIST,
   MAX_GROUPS,
 } from "../constants/Constants";
-import { useTour } from "../provider/TourProvider";
+import useTour from "../provider/Tour";
 import { createRoute } from "../utils/utils";
+import PropTypes from 'prop-types';
 
 export default function GroupButtons({ group, setGroup, moveItem }) {
   const [isDeleteGroupOpen, setIsDeleteGroupOpen] = useState([]);
@@ -160,4 +161,10 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
       ) : null}
     </div>
   );
+}
+
+GroupButtons.propTypes = {
+    group: PropTypes.string.isRequired,
+    moveItem: PropTypes.func.isRequired,
+    setGroup: PropTypes.func.isRequired,
 }
