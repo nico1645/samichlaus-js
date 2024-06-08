@@ -164,7 +164,6 @@ export default function CustomerEdit() {
                 className="w-full rounded-lg p-1 border-black border-2"
                 id="email"
                 type="text"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email Address"
@@ -175,7 +174,6 @@ export default function CustomerEdit() {
                 className="w-full rounded-lg p-1 border-black border-2"
                 id="phone"
                 type="text"
-                required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Phone Number"

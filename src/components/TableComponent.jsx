@@ -51,7 +51,6 @@ const TableComponent = ({ route, group, nameRef }) => {
   };
 
   const handleUpdateTime = () => {
-    console.log("test send");
     const data = {
         depot: DEPOT,
         startTime: route.customerStart,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 import { getYears, getCustomers } from "../utils/utils.js";
@@ -8,6 +8,8 @@ import SearchCardComponent from "../components/SearchCardComponent.jsx";
 
 export default function Search() {
   const [error, setError] = useState("");
+  const countChildren = useRef(0);
+  const countSenior = useRef(0);
   const [errorBool, setErrorBool] = useState(false);
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const navigate = useNavigate();
@@ -39,9 +41,15 @@ export default function Search() {
   useEffect(() => {
     if (selectedYearOption)
         getCustomers((res) => {
+            countSenior.current = 0;
+            countChildren.current = 0;
             setErrorBool(false);
             setCustomers(res.data);
             setFilteredCustomers(res.data);
+            res.data.forEach((c) => {
+                countChildren.current += c.children;
+                countSenior.current += c.seniors;
+            })
         }, errCallback, selectedYearOption.value);
   }, [selectedYearOption]);
 
@@ -109,21 +117,34 @@ export default function Search() {
               }}
               options={yearOption}
             />
-                <input
-                    className="h-9 p-2 text-black rounded-md border border-gray-300"
-                    placeholder="Search"
-                    onChange={filterCustomers}
+            <input
+                className="h-9 p-2 text-black rounded-md border border-gray-300"
+                placeholder="Search"
+                onChange={filterCustomers}
+            />
+            <div>
+                <input 
+                    type="checkbox"
+                    value={isSenior}
+                    onChange={(e) => {
+                        setIsSenior(e.target.checked)
+                    }}
                 />
-                <div>
-                    <input 
-                        type="checkbox"
-                        value={isSenior}
-                        onChange={(e) => {
-                            setIsSenior(e.target.checked)
-                        }}
-                    />
-                    <label className="ml-2">Only Seniors</label>
+                <label className="ml-2">Only Seniors</label>
+            </div>
+            <div className="ml-8">
+                <div className="flex flex-col">
+                    <div>
+                        Total: {customers.length}
+                    </div>
+                    <div>
+                        Children: {countChildren.current}
+                    </div>
+                    <div>
+                        Seniors: {countSenior.current}
+                    </div>
                 </div>
+            </div>
             </div>
             {errorBool ? (
               <div className="w-full mt-2 rounded-lg p-2 text-white bg-red-500 border-red-600 border-2">

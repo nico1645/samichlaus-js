@@ -107,6 +107,22 @@ export const parseDate = (utcString) => {
   );
 };
 
+export const isTime1Earlier = (time1, time2) => {
+  const [hours1, minutes1, sec1] = time1.split(":").map(Number);
+  const [hours2, minutes2, sec2] = time2.split(":").map(Number);
+  if (hours1 < hours2) return true;
+  else if (hours2 < hours1) return false;
+  else {
+    if (minutes1 < minutes2) return true;
+    else if (minutes2 < minutes1) return false;
+    else {
+        if (sec1 < sec2) return true;
+        else return false;
+    }
+  }
+
+}
+
 const childMap = {
     0: 0,
     1: 15,

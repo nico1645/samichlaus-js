@@ -8,6 +8,7 @@ import {
   route_comparator_group,
   getAbsMinuteDifference,
   getVisitTime,
+  isTime1Earlier,
 } from "../constants/Constants";
 import {
   deleteCustomer,
@@ -137,7 +138,8 @@ const _moveItem = (fromGroup, toGroup, fromIndex, toIndex, oldTour, newTour, err
 
 const _setGroupStartTime = (tour, group, startTime, errCallback) => {
   const updateCustomerData = [];
-  const absMinuteDiff = getAbsMinuteDifference(startTime, tour[group].customerStart);
+  const tmp = getAbsMinuteDifference(startTime, tour[group].customerStart);
+  const absMinuteDiff = isTime1Earlier(startTime, tour[group].customerStart) ? -tmp: tmp;
   const newCustomerEnd = addMinutesToTime(tour[group].customerEnd, absMinuteDiff);
   tour[group].customerStart = startTime;
   tour[group].customerEnd = newCustomerEnd;

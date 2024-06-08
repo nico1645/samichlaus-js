@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
-import { RAYON_OPTIONS } from "../constants/Constants";
+import { RAYON_OPTIONS, MAX_GROUPS } from "../constants/Constants";
 import { useTour } from "../provider/TourProvider";
 import { getExcel, getTour, getYears, postCalculateTour } from "../utils/utils";
 
@@ -39,6 +39,14 @@ export default function Settings({ isOpen, onClose, setGroup }) {
   useEffect(() => {
     if (modal.current) {
       if (isOpen) {
+        setSelectedYearOption({
+            value: year,
+            label: year,
+        });
+        setRayonOption({
+            value: rayon,
+            label: "Rayon " + "I".repeat(rayon),
+        });
         modal.current.showModal();
       } else {
         modal.current.close();
@@ -92,7 +100,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     postCalculateTour(
       calculateTourSuccCallback,
       errCallback,
-      { maxTimeInSeconds: maxSeconds },
+      { maxTimeInSeconds: maxSeconds, maxGroups: MAX_GROUPS, maxVisitTimePerGroup: 180 },
       selectedYearOption.value,
       rayonOption.value
     );
