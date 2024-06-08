@@ -35,7 +35,6 @@ export default function Home() {
     setSamichlausGroupName,
     setTourDate,
     errorBool,
-    error,
     setError,
   } = useTour();
   const mapRef = useRef(null);
@@ -235,7 +234,6 @@ export default function Home() {
       <Error
         isOpen={errorBool}
         onClose={onCloseError}
-        error={error}
       />
       <Settings
         isOpen={isSettingsOpen}

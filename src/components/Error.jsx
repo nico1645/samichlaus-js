@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
+import { useTour } from "../provider/TourProvider";
 
-export default function Error({ isOpen, onClose, error }) {
+export default function Error({ isOpen, onClose }) {
   const modal = useRef(null);
+  const { error } = useTour();
   useEffect(() => {
     if (modal.current) {
       if (isOpen) {

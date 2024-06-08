@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   COLOR_DICT,
   GROUP_DICT,
@@ -10,8 +11,8 @@ import { createRoute } from "../utils/utils";
 
 export default function GroupButtons({ group, setGroup, moveItem }) {
   const [isDeleteGroupOpen, setIsDeleteGroupOpen] = useState([]);
-  const { tour, addNewGroup, removeGroup, numOfGroups, tourId } = useTour();
-  const dragCounter = useRef(0);
+  const { tour, addNewGroup, removeGroup, numOfGroups, tourId, setError } = useTour();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (numOfGroups > 0)
@@ -35,11 +36,24 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
     setIsDeleteGroupOpen(new Array(isDeleteGroupOpen.length).fill(false));
   };
 
+  const errCallback = (err) => {
+    if (err.response) {
+      if (err.response.status === 403) navigate("/logout", { replace: true });
+      setError(
+        "Error (" + err.response.status + "): " + err.response.data.message, true
+      );
+    } else if (err.request) {
+      setError("Unexpected Error: " + err.message, true);
+    } else {
+      setError("Unexpected Error: " + err.message, true);
+    }
+  };
+
   const handleAddGroup = () => {
     if (numOfGroups === 0) {
       createRoute(
         (res) => addNewGroup(res.data),
-        () => {},
+        errCallback,
         {
           customerStart: "00:00:00",
           customerEnd: "00:00:00",
