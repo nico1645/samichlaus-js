@@ -43,6 +43,16 @@ export default function Home() {
   const [layerGroups, setLayerGroups] = useState([]);
   const nameRef = useRef({});
   const dragCounter = useRef(0);
+  const markerIcons = {};
+
+  [...GROUP_LIST, "Z"].forEach((group) => {
+    for (let index = 0; index < 21; index++) {
+      const markerURI = `marker/marker-${COLOR_DICT[group]}-${Math.min(index + 1, 21)}.png`;
+      const img = new Image();
+      img.src = markerURI;
+      markerIcons[`${group}-${index}`] = img;
+    }
+  });
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -116,15 +126,13 @@ export default function Home() {
       if (i == numOfGroups) g = "Z";
       else g = GROUP_LIST[i];
       tour[g].customers.forEach((customer, index) => {
-        const markerURI = `marker/marker-${COLOR_DICT[g]}-${Math.min(
-          index + 1,
-          21
-        )}.png`;
+        const markerIcon = markerIcons[`${g}-${Math.min(index + 1, 21)}`];
+        if (markerIcon == undefined) console.log(`${g}-${Math.min(index + 1, 21)}`);
         const icon = L.icon({
-          iconUrl: markerURI,
+          iconUrl: markerIcon.src,
           iconSize: [30, 35],
           iconAnchor: [15, 35],
-          iconRetinaUrl: markerURI,
+          iconRetinaUrl: markerIcon.src,
           popupAnchor: [0, -20],
         });
         const marker = L.marker(
@@ -192,7 +200,6 @@ export default function Home() {
   };
 
   const changeEditMode = () => {
-    saveSamichlausGroupNames();
     setIsTableMode(!isTableMode);
   };
 
