@@ -228,3 +228,45 @@ export const updateRouteTime = (succCallback, errCallback, data) => {
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
 }
+
+export const postMail = (
+  succCallback,
+  errCallback,
+  data,
+) => {
+  axios
+    .post(
+      `${
+        import.meta.env.VITE_APP_BACKEND_URL
+      }api/v1/mail`,
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((res) => succCallback(res))
+    .catch((err) => errCallback(err));
+};
+
+export const postManyMail = (
+  succCallback,
+  errCallback,
+  data,
+) => {
+  axios
+    .post(
+      `${
+        import.meta.env.VITE_APP_BACKEND_URL
+      }api/v1/mail/many`,
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((res) => succCallback(res))
+    .catch((err) => errCallback(err));
+};

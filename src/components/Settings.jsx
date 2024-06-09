@@ -210,6 +210,18 @@ export default function Settings({ isOpen, onClose, setGroup }) {
             Goto Page
           </button>
         </div>
+        <div className="flex justify-between items-center mb-4">
+          <div>Mail Service:</div>
+          <button
+            className="p-2 rounded-lg bg-primary-600 hover:bg-primary-800 text-white"
+            onClick={() => {
+              onClose();
+              navigate("/customer-mail/"+selectedYearOption.value);
+            }}
+          >
+            Goto Page
+          </button>
+        </div>
         <div className="flex flex-col md:flex-row gap-2 justify-between">
           <button
             onClick={handleDownloadExcel}

@@ -11,6 +11,7 @@ import Customer from "../pages/Customer";
 import CustomerEdit from "../pages/CustomerEdit";
 import Search from "../pages/Search";
 import TourProvider from "../provider/TourProvider";
+import Mail from "../pages/Mail";
 
 const Routes = () => {
   const { token } = useAuth();
@@ -57,6 +58,10 @@ const Routes = () => {
               <Search />
             </TourProvider>
             ),
+        },
+        {
+          path: "/customer-mail/:year",
+          element: <Mail />
         },
         {
           path: "/logout",
