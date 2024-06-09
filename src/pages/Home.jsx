@@ -46,8 +46,8 @@ export default function Home() {
   const markerIcons = {};
 
   [...GROUP_LIST, "Z"].forEach((group) => {
-    for (let index = 0; index < 21; index++) {
-      const markerURI = `marker/marker-${COLOR_DICT[group]}-${Math.min(index + 1, 21)}.png`;
+    for (let index = 1; index <= 21; index++) {
+      const markerURI = `marker/marker-${COLOR_DICT[group]}-${index}.png`;
       const img = new Image();
       img.src = markerURI;
       markerIcons[`${group}-${index}`] = img;
@@ -185,9 +185,9 @@ export default function Home() {
           values[value] = nameRef.current[value].value;
       });
       const customers = [];
-      Object.values(tour).forEach((route) => {
-        if (route === "Z") return;
-        route.customers.forEach((customer) => {
+      Object.keys(tour).forEach((group) => {
+        if (group === "Z") return;
+        tour[group].customers.forEach((customer) => {
           customers.push({
             customerId: customer.customerId,
             visitTime: customer.visitTime,
@@ -200,6 +200,14 @@ export default function Home() {
   };
 
   const changeEditMode = () => {
+    Object.keys(tour).forEach((group) => {
+      if (group === "Z") return;
+      nameRef.current[group+'samichlaus'].value = tour[group].samichlaus;
+      nameRef.current[group+'schmutzli'].value = tour[group].schmutzli;
+      nameRef.current[group+'ruprecht'].value = tour[group].ruprecht;
+      nameRef.current[group+'engel1'].value = tour[group].engel1;
+      nameRef.current[group+'engel2'].value = tour[group].engel2;
+    })
     setIsTableMode(!isTableMode);
   };
 
