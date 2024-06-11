@@ -14,7 +14,7 @@ import Sidebar from "../components/Sidebar";
 import CardComponent from "../components/CardComponent";
 import TableComponent from "../components/TableComponent";
 import Error from "../components/Error.jsx";
-import { updateManyCustomers } from "../utils/utils";
+import { updateManyCustomers, updateManyRoutes } from "../utils/utils";
 
 export default function Home() {
   const [isCreateCustomerOpen, setIsCreateCustomerOpen] = useState(false);
@@ -181,20 +181,29 @@ export default function Home() {
     if (isTableMode) {
       const values = {};
       Object.keys(nameRef.current).forEach((value) => {
-        if (nameRef.current[value])
+        if (nameRef.current[value] && value.length < 20)
           values[value] = nameRef.current[value].value;
+        else if (nameRef.current[value])
+          values[value] = nameRef.current[value].checked ? "car" : "foot";
       });
       const customers = [];
+      const routes = [];
       Object.keys(tour).forEach((group) => {
         if (group === "Z") return;
+        routes.push({
+          routeId: tour[group].routeId, 
+          transport: values[tour[group].routeId]
+        });
         tour[group].customers.forEach((customer) => {
           customers.push({
             customerId: customer.customerId,
             visitTime: customer.visitTime,
+            transport: values[customer.customerId]
           })
         })
       })
       updateManyCustomers(() => {}, () => {}, customers);
+      updateManyRoutes(() => {}, () => {}, routes);
       setSamichlausGroupName(values);
     }
   };
@@ -226,7 +235,7 @@ export default function Home() {
 
   const drop = (e) => {
         moveItem(parseInt(e.dataTransfer.getData("fromIndex")), dragTo, e.dataTransfer.getData("fromGroup"), dragOverGroup);
-    }
+  }
 
   const dragStart = (e, fromIndex, fromGroup) => {
         e.dataTransfer.setData("fromIndex", fromIndex);

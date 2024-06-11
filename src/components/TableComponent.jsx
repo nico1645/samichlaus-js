@@ -7,12 +7,17 @@ const TableComponent = ({ route, group, nameRef }) => {
   const [senior, setSenior] = useState();
   const [children, setChildren] = useState(0);
   const { addTime, updateTime } = useTour();
+  const [transport, setTransport] = useState(route.transport === "car");
 
   useEffect(() => {
     let s = 0;
     let s1 = 0;
     route.customers.forEach((c) => (s = c.children + s));
-    route.customers.forEach((c) => (s1 = c.seniors + s1));
+    route.customers.forEach((c) => {
+        (s1 = c.seniors + s1)
+        c.address.rayon = c.address.rayon - 1;
+        c.visitRayon = c.visitRayon - 1;
+    });
     setChildren(s);
     setSenior(s1);
   }, [route]);
@@ -20,6 +25,12 @@ const TableComponent = ({ route, group, nameRef }) => {
   const generateInputRef = (key) => {
     return (ref) => {
       nameRef.current[group + key] = ref;
+    };
+  };
+
+  const generateTransportRef = (key) => {
+    return (ref) => {
+      nameRef.current[key] = ref;
     };
   };
 
@@ -54,14 +65,15 @@ const TableComponent = ({ route, group, nameRef }) => {
   const handleUpdateTime = () => {
     const data = {
         depot: DEPOT,
+        transport: transport ? "car" : "foot",
         startTime: route.customerStart,
         customers: route.customers,
         endTime: route.customerEnd,
     }
     data.customers.forEach((c) => {
-        c.address.rayon = c.address.rayon - 1;
-        c.visitRayon = c.visitRayon - 1;
+        c.transport = nameRef.current[c.customerId].checked ? "car" : "foot";
     })
+    console.log(data);
     updateRouteTime((res) => {
         const data = res.data;
         updateTime(group, data);
@@ -160,11 +172,12 @@ const TableComponent = ({ route, group, nameRef }) => {
               <tr>
                 <th className="border px-1">Start Time</th>
                 <th className="text-nowrap" colSpan={2}>
-                  Laufen/Fahren
+                  {transport ? "Fahren" : "Laufen" }
                 </th>
                 <th className=" px-1">Children</th>
                 <th className=" px-1">Seniors</th>
                 <th className=" px-1">Minutes</th>
+                <th className=" px-1">Car</th>
               </tr>
             </thead>
             <tbody>
@@ -190,6 +203,17 @@ const TableComponent = ({ route, group, nameRef }) => {
                     onChange={(e) => handleTimeChange(e, -1)}
                     min={0}
                     max={300}
+                  />
+                </td>
+                <td className="text-center">
+                  <input
+                    className="text-black border-gray-300 border rounded-md px-1 mx-auto"
+                    type="checkbox"
+                    ref={generateTransportRef(route.routeId)}
+                    checked={transport}
+                    onChange={(e) => {
+                      setTransport(e.target.checked)
+                    }}
                   />
                 </td>
               </tr>
@@ -232,6 +256,15 @@ const TableComponent = ({ route, group, nameRef }) => {
                         onChange={(e) => handleTimeChange(e, index)}
                         min={0}
                         max={300}
+                      />
+                    </td>
+                    <td className="text-nowrap border text-center">
+                      <input
+                        id={"transport-" + group + index}
+                        className="text-black border-gray-300 border rounded-md px-1 mx-auto"
+                        type="checkbox"
+                        defaultChecked={customer.transport === "car"}
+                        ref={generateTransportRef(customer.customerId)}
                       />
                     </td>
                   </tr>

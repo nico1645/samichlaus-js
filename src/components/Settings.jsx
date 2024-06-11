@@ -82,12 +82,9 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     setYearOption(options);
   };
 
-  const calculateTourSuccCallback = (res) => {
+  const calculateTourSuccCallback = () => {
     setErrorBool(false);
-    if (res.data.routes.length - 1 > 0) setGroup("A");
-    else setGroup("");
-    setNewTour(res.data);
-    onClose();
+    navigate(0);
   };
 
   //const revert = () => {};
