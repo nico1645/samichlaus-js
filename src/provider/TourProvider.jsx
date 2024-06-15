@@ -37,6 +37,7 @@ const ACTIONS = {
   removeCustomer: "removeCustomer",
   addTime: "addTime",
   updateTime: "updateTime",
+  updateTransport: "updateTransport",
   addNewCustomer: "addNewCustomer",
   setError: "setError",
 };
@@ -472,6 +473,12 @@ const tourReducer = (state, action) => {
     case ACTIONS.setError:
         return { ...state, errorBool: action.payload.errorBool, error: action.payload.error };
 
+    case ACTIONS.updateTransport:
+        if (action.payload.index === -1)
+          state.tour[action.payload.group].transport = action.payload.value;
+        else
+          state.tour[action.payload.group].customers[action.payload.index].transport = action.payload.value;
+        return { ...state, tour: { ...state.tour } };
 
     default:
       console.error(
@@ -563,6 +570,13 @@ const TourProvider = ({ children }) => {
     });
   };
 
+  const updateTransport = (group, index, value) => {
+    dispatch({
+      type: ACTIONS.updateTransport,
+      payload: { group: group, index: index, value: value },
+    });
+  };
+
   const updateTime = (group, routeObj) => {
     dispatch({
       type: ACTIONS.updateTime,
@@ -613,6 +627,7 @@ const TourProvider = ({ children }) => {
       addTime,
       updateTime,
       addNewCustomer,
+      updateTransport,
       setError,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

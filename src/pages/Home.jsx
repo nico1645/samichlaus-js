@@ -181,10 +181,8 @@ export default function Home() {
     if (isTableMode) {
       const values = {};
       Object.keys(nameRef.current).forEach((value) => {
-        if (nameRef.current[value] && value.length < 20)
+        if (nameRef.current[value])
           values[value] = nameRef.current[value].value;
-        else if (nameRef.current[value])
-          values[value] = nameRef.current[value].checked ? "car" : "foot";
       });
       const customers = [];
       const routes = [];
@@ -192,13 +190,13 @@ export default function Home() {
         if (group === "Z") return;
         routes.push({
           routeId: tour[group].routeId, 
-          transport: values[tour[group].routeId]
+          transport: tour[group].transport
         });
         tour[group].customers.forEach((customer) => {
           customers.push({
             customerId: customer.customerId,
             visitTime: customer.visitTime,
-            transport: values[customer.customerId]
+            transport: customer.transport
           })
         })
       })

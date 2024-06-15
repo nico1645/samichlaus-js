@@ -6,8 +6,7 @@ import PropTypes from 'prop-types';
 const TableComponent = ({ route, group, nameRef }) => {
   const [senior, setSenior] = useState();
   const [children, setChildren] = useState(0);
-  const { addTime, updateTime } = useTour();
-  const [transport, setTransport] = useState(route.transport === "car");
+  const { addTime, updateTime, updateTransport } = useTour();
 
   useEffect(() => {
     let s = 0;
@@ -65,15 +64,11 @@ const TableComponent = ({ route, group, nameRef }) => {
   const handleUpdateTime = () => {
     const data = {
         depot: DEPOT,
-        transport: transport ? "car" : "foot",
+        transport: route.transport,
         startTime: route.customerStart,
         customers: route.customers,
         endTime: route.customerEnd,
     }
-    data.customers.forEach((c) => {
-        c.transport = nameRef.current[c.customerId].checked ? "car" : "foot";
-    })
-    console.log(data);
     updateRouteTime((res) => {
         const data = res.data;
         updateTime(group, data);
@@ -172,7 +167,7 @@ const TableComponent = ({ route, group, nameRef }) => {
               <tr>
                 <th className="border px-1">Start Time</th>
                 <th className="text-nowrap" colSpan={2}>
-                  {transport ? "Fahren" : "Laufen" }
+                  {route.transport === "car" ? "Car" : "Laufen" }
                 </th>
                 <th className=" px-1">Children</th>
                 <th className=" px-1">Seniors</th>
@@ -207,13 +202,11 @@ const TableComponent = ({ route, group, nameRef }) => {
                 </td>
                 <td className="text-center">
                   <input
+                    id={"route-transport-" + group}
                     className="text-black border-gray-300 border rounded-md px-1 mx-auto"
                     type="checkbox"
-                    ref={generateTransportRef(route.routeId)}
-                    checked={transport}
-                    onChange={(e) => {
-                      setTransport(e.target.checked)
-                    }}
+                    checked={route.transport === "car"}
+                    onChange={(e) => updateTransport(group, -1, e.target.checked ? "car" : "foot")}
                   />
                 </td>
               </tr>
@@ -263,8 +256,8 @@ const TableComponent = ({ route, group, nameRef }) => {
                         id={"transport-" + group + index}
                         className="text-black border-gray-300 border rounded-md px-1 mx-auto"
                         type="checkbox"
-                        defaultChecked={customer.transport === "car"}
-                        ref={generateTransportRef(customer.customerId)}
+                        checked={customer.transport === "car"}
+                        onChange={(e) => updateTransport(group, index, e.target.checked ? "car" : "foot")}
                       />
                     </td>
                   </tr>
