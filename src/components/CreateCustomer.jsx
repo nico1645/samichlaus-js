@@ -156,6 +156,7 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
               cacheOptions
               loadOptions={loadOptions}
               defaultOptions
+              menuPosition="fixed"
             />
           </div>
           <div className=" flex flex-row gap-6">

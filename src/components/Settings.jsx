@@ -150,7 +150,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
           X
         </span>
       </div>
-      <div className="modal-body dark:text-white">
+      <div className="modal-body dark:text-white overflow-hidden">
         {/*<div className="flex items-center mb-4">
           <div>Storing data:</div>
           <div className=" flex-grow"></div>
@@ -180,6 +180,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
                 handleYearRayonChange(selected.value, rayonOption.value);
               }}
               options={yearOption}
+              menuPosition="fixed"
             />
           </div>
           <div className="flex flex-row gap-4 md:gap-8 items-center">
