@@ -20,14 +20,14 @@ export default function CardComponent({ customer, index, group, dropItem }) {
 
 
   return (
-    <div className="flex-grow cursor-grab h-[calc(5rem-4px)] m-1 active:cursor-grabbing select-none border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-black shadow-sm">
+    <div className="flex-grow w-full max-w-full cursor-grab h-[calc(5rem-4px)] m-1 active:cursor-grabbing select-none border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-black shadow-sm">
       <div className="p-2 w-full whitespace-nowrap overflow-hidden">
         <div className="flex items-center justify-between gap-2">
-          <div className=" overflow-clip flex-grow max-w-64 md:max-w-40 lg:max-w-64">
-            <h2 className="text-lg pt-2 ">
+          <div className=" overflow-clip flex-grow">
+            <h2 className="text-lg pt-2 text-nowrap truncate">
               {customer.firstName + " " + customer.lastName}
             </h2>
-            <p className=" text-sm pb-4">{customer.address.address}</p>
+            <p className=" text-sm pb-4 text-nowrap truncate">{customer.address.address}</p>
           </div>
           <div className=" flex flex-col justify-center items-center gap-2 ">
             <div className="flex flex-row gap-2 -translate-y-3">
