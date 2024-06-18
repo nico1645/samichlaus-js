@@ -27,12 +27,6 @@ const TableComponent = ({ route, group, nameRef }) => {
     };
   };
 
-  const generateTransportRef = (key) => {
-    return (ref) => {
-      nameRef.current[key] = ref;
-    };
-  };
-
   const handleTimeChange = (e, index) => {
     if (!parseInt(e.target.value)) return;
     const value = parseInt(e.target.value);

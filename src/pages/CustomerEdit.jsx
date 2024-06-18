@@ -149,6 +149,7 @@ export default function CustomerEdit() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First Name"
+                autoComplete="given-name"
               />
               <input
                 className=" flex-grow rounded-lg p-1 border-black border-2"
@@ -158,6 +159,7 @@ export default function CustomerEdit() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last Name"
+                autoComplete="family-name"
               />
             </div>
             <div className="flex-grow">
@@ -168,6 +170,7 @@ export default function CustomerEdit() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email Address"
+                autoComplete="email"
               />
             </div>
             <div className="flex grow">
@@ -178,6 +181,7 @@ export default function CustomerEdit() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Phone Number"
+                autoComplete="phone"
               />
             </div>
             <div className=" flex-grow">

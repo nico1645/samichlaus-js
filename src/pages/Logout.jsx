@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../provider/AuthProvider";
+import useAuth from "../provider/Auth";
 import { useEffect } from "react";
 
 const Logout = () => {

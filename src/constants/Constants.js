@@ -148,6 +148,5 @@ export const getVisitTime = (children, seniors) => {
         time += seniorMap[seniors];
     else
         time += 40;
-    //console.log("time: " + time);
     return time
 }

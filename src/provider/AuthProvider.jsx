@@ -1,9 +1,9 @@
 import axios from "axios";
-import { createContext, useContext, useMemo, useReducer } from "react";
+import { createContext, useMemo, useReducer } from "react";
 import PropTypes from 'prop-types';
 
 // Create the authentication context
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 // Define the possible actions for the authReducer
 const ACTIONS = {
@@ -78,11 +78,6 @@ const AuthProvider = ({ children }) => {
 
 AuthProvider.propTypes = {
     children: PropTypes.node.isRequired,
-};
-
-// Custom hook to easily access the authentication context
-export const useAuth = () => {
-  return useContext(AuthContext);
 };
 
 export default AuthProvider;

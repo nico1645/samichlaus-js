@@ -67,6 +67,8 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     if (res.data && res.data.length > 0) {
       if (year && rayon && res.data.includes(year))
         handleYearRayonChange(year, rayon);
+      else
+        handleYearRayonChange(res.data[0], 1);
 
       setSelectedYearOption({
         value: res.data[0],

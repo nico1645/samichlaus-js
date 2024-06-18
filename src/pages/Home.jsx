@@ -325,7 +325,7 @@ export default function Home() {
               </div>
               {group ? (
                 <div className="flex flex-col h-[40vh] md:h-[92vh] overflow-y-hidden md:overflow-auto lg:flex-row">
-                  <div className="overflow-y-auto md:max-h-1/2 lg:w-1/2">
+                  <div className="overflow-y-auto md:max-h-1/2">
                     {tour[group].customers.map((customer, i) => {
                       return (
                         <div

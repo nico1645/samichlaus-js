@@ -1,17 +1,19 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { useAuth } from "../provider/AuthProvider";
+import useAuth from "../provider/Auth";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { lazy } from "react";
 import Login from "../pages/Login";
-import Signup from "../pages/Singup";
-import Error from "../pages/Error";
-import Logout from "../pages/Logout";
-import Home from "../pages/Home";
-import Address from "../pages/Address";
-import Customer from "../pages/Customer";
-import CustomerEdit from "../pages/CustomerEdit";
-import Search from "../pages/Search";
-import TourProvider from "../provider/TourProvider";
-import Mail from "../pages/Mail";
+
+const Error = lazy(() => import('../pages/Error.jsx'));
+const Logout = lazy(() => import('../pages/Logout.jsx'));
+const Signup = lazy(() => import('../pages/Signup.jsx'));
+const Home = lazy(() => import('../pages/Home.jsx'));
+const Address = lazy(() => import('../pages/Address.jsx'));
+const Customer = lazy(() => import('../pages/Customer.jsx'));
+const CustomerEdit = lazy(() => import('../pages/CustomerEdit.jsx'));
+const Search = lazy(() => import('../pages/Search.jsx'));
+const Mail = lazy(() => import('../pages/Mail.jsx'));
+const TourProvider = lazy(() => import('../provider/TourProvider.jsx'));
 
 const Routes = () => {
   const { token } = useAuth();
