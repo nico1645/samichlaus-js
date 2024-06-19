@@ -4,7 +4,7 @@ export const getAddressesContaining = (
   searchTerm,
   callback,
   succCallback,
-  errCallback
+  errCallback,
 ) => {
   axios
     .get(
@@ -16,7 +16,7 @@ export const getAddressesContaining = (
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      }
+      },
     )
     .then((res) => succCallback(res, callback))
     .catch((err) => errCallback(err));
@@ -49,7 +49,7 @@ export const postCalculateTour = (
   errCallback,
   data,
   year,
-  rayon
+  rayon,
 ) => {
   axios
     .post(
@@ -61,7 +61,7 @@ export const postCalculateTour = (
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     )
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
@@ -87,7 +87,7 @@ export const getTour = (succCallback, errCallback, year, rayon) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     )
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
@@ -124,7 +124,7 @@ export const putCustomer = (succCallback, errCallback, data, uuid) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     )
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
@@ -187,22 +187,30 @@ export const updateRoute = (succCallback, errCallback, data) => {
 
 export const updateManyCustomers = (succCallback, errCallback, data) => {
   axios
-    .patch(`${import.meta.env.VITE_APP_BACKEND_URL}api/v1/customer/many`, data, {
-      headers: {
-        "Content-Type": "application/json",
+    .patch(
+      `${import.meta.env.VITE_APP_BACKEND_URL}api/v1/customer/many`,
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    })
+    )
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
 };
 
 export const patchCustomer = (succCallback, errCallback, data) => {
   axios
-    .patch(`${import.meta.env.VITE_APP_BACKEND_URL}api/v1/customer/many`, data, {
-      headers: {
-        "Content-Type": "application/json",
+    .patch(
+      `${import.meta.env.VITE_APP_BACKEND_URL}api/v1/customer/many`,
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    })
+    )
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
 };
@@ -227,46 +235,26 @@ export const updateRouteTime = (succCallback, errCallback, data) => {
     })
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
-}
+};
 
-export const postMail = (
-  succCallback,
-  errCallback,
-  data,
-) => {
+export const postMail = (succCallback, errCallback, data) => {
   axios
-    .post(
-      `${
-        import.meta.env.VITE_APP_BACKEND_URL
-      }api/v1/mail`,
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    .post(`${import.meta.env.VITE_APP_BACKEND_URL}api/v1/mail`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
 };
 
-export const postManyMail = (
-  succCallback,
-  errCallback,
-  data,
-) => {
+export const postManyMail = (succCallback, errCallback, data) => {
   axios
-    .post(
-      `${
-        import.meta.env.VITE_APP_BACKEND_URL
-      }api/v1/mail/many`,
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    .post(`${import.meta.env.VITE_APP_BACKEND_URL}api/v1/mail/many`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
     .then((res) => succCallback(res))
     .catch((err) => errCallback(err));
 };

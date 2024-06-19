@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import useTour from "../provider/Tour";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 export default function Error({ isOpen, onClose }) {
   const modal = useRef(null);

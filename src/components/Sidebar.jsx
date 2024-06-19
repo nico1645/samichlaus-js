@@ -1,13 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
-export default function Sidebar({ openSettings, openCreateCustomer}) {
-
-    const navigate = useNavigate();
+export default function Sidebar({ openSettings, openCreateCustomer }) {
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col gap-1 m-1 w-14 bg-gray-50 rounded-lg dark:border  dark:bg-gray-800 dark:border-gray-700">
-      <div onClick={() => navigate(0)} className=" border-white bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 border-2 m-1 rounded-lg p-2 text-center flex-shrink dark:border-gray-600 dark:hover:bg-gray-600">
+      <div
+        onClick={() => navigate(0)}
+        className=" border-white bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 border-2 m-1 rounded-lg p-2 text-center flex-shrink dark:border-gray-600 dark:hover:bg-gray-600"
+      >
         <img src="/samichlaus_icon.png" alt="samichlaus icon" />
       </div>
       <div

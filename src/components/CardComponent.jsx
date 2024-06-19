@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import useTour from "../provider/Tour";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 export default function CardComponent({ customer, index, group, dropItem }) {
   const navigate = useNavigate();
@@ -18,7 +18,6 @@ export default function CardComponent({ customer, index, group, dropItem }) {
     }
   };
 
-
   return (
     <div className="flex-grow w-full max-w-full cursor-grab h-[calc(5rem-4px)] m-1 active:cursor-grabbing select-none border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-black shadow-sm">
       <div className="p-2 w-full whitespace-nowrap overflow-hidden">
@@ -27,7 +26,9 @@ export default function CardComponent({ customer, index, group, dropItem }) {
             <h2 className="text-lg pt-2 text-nowrap truncate">
               {customer.firstName + " " + customer.lastName}
             </h2>
-            <p className=" text-sm pb-4 text-nowrap truncate">{customer.address.address}</p>
+            <p className=" text-sm pb-4 text-nowrap truncate">
+              {customer.address.address}
+            </p>
           </div>
           <div className=" flex flex-col justify-center items-center gap-2 ">
             <div className="flex flex-row gap-2 -translate-y-3">
@@ -53,10 +54,8 @@ export default function CardComponent({ customer, index, group, dropItem }) {
               <div
                 className=" cursor-pointer"
                 onClick={() => {
-                  if (group === "Z")
-                    removeCustomer(index, customer.customerId);
-                  else
-                    dropItem(index, -1, group, "Z");
+                  if (group === "Z") removeCustomer(index, customer.customerId);
+                  else dropItem(index, -1, group, "Z");
                 }}
               >
                 <svg
@@ -86,8 +85,8 @@ export default function CardComponent({ customer, index, group, dropItem }) {
 }
 
 CardComponent.propTypes = {
-    customer: PropTypes.object.isRequired,
-    index: PropTypes.number.isRequired,
-    group: PropTypes.string.isRequired,
-    dropItem: PropTypes.func.isRequired,
-}
+  customer: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired,
+  group: PropTypes.string.isRequired,
+  dropItem: PropTypes.func.isRequired,
+};

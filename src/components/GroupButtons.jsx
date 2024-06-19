@@ -8,11 +8,12 @@ import {
 } from "../constants/Constants";
 import useTour from "../provider/Tour";
 import { createRoute } from "../utils/utils";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 export default function GroupButtons({ group, setGroup, moveItem }) {
   const [isDeleteGroupOpen, setIsDeleteGroupOpen] = useState([]);
-  const { tour, addNewGroup, removeGroup, numOfGroups, tourId, setError } = useTour();
+  const { tour, addNewGroup, removeGroup, numOfGroups, tourId, setError } =
+    useTour();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,7 +42,8 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
     if (err.response) {
       if (err.response.status === 403) navigate("/logout", { replace: true });
       setError(
-        "Error (" + err.response.status + "): " + err.response.data.message, true
+        "Error (" + err.response.status + "): " + err.response.data.message,
+        true,
       );
     } else if (err.request) {
       setError("Unexpected Error: " + err.message, true);
@@ -52,22 +54,18 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
 
   const handleAddGroup = () => {
     if (numOfGroups === 0) {
-      createRoute(
-        (res) => addNewGroup(res.data),
-        errCallback,
-        {
-          customerStart: "00:00:00",
-          customerEnd: "00:00:00",
-          transport: "foot",
-          samichlaus: "",
-          ruprecht: "",
-          schmutzli: "",
-          engel1: "",
-          engel2: "",
-          group: GROUP_LIST[numOfGroups],
-          tourId: tourId,
-        }
-      );
+      createRoute((res) => addNewGroup(res.data), errCallback, {
+        customerStart: "00:00:00",
+        customerEnd: "00:00:00",
+        transport: "foot",
+        samichlaus: "",
+        ruprecht: "",
+        schmutzli: "",
+        engel1: "",
+        engel2: "",
+        group: GROUP_LIST[numOfGroups],
+        tourId: tourId,
+      });
     } else {
       createRoute(
         (res) => addNewGroup(res.data),
@@ -83,7 +81,7 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
           engel2: "",
           group: GROUP_LIST[numOfGroups],
           tourId: tourId,
-        }
+        },
       );
     }
   };
@@ -108,7 +106,14 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
                 }}
                 onContextMenu={(e) => handleDeleteGroupOpenMenu(e, val)}
                 onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => moveItem(e.dataTransfer.getData("fromIndex"), tour[val].customers.length, e.dataTransfer.getData("fromGroup"), val)}
+                onDrop={(e) =>
+                  moveItem(
+                    e.dataTransfer.getData("fromIndex"),
+                    tour[val].customers.length,
+                    e.dataTransfer.getData("fromGroup"),
+                    val,
+                  )
+                }
                 className={`flex items-center justify-around select-none h-10 w-10 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-600 text-center hover:cursor-pointer border-2 border-${
                   color === "black" ? "black" : color + "-400"
                 }`}
@@ -127,7 +132,7 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
                     className="px-4 p-2 rounded-lg bg-gray-200 hover:bg-gray-300  text-black select-none"
                     onClick={() =>
                       setIsDeleteGroupOpen(
-                        new Array(isDeleteGroupOpen.length).fill(false)
+                        new Array(isDeleteGroupOpen.length).fill(false),
                       )
                     }
                   >
@@ -164,7 +169,7 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
 }
 
 GroupButtons.propTypes = {
-    group: PropTypes.string.isRequired,
-    moveItem: PropTypes.func.isRequired,
-    setGroup: PropTypes.func.isRequired,
-}
+  group: PropTypes.string.isRequired,
+  moveItem: PropTypes.func.isRequired,
+  setGroup: PropTypes.func.isRequired,
+};

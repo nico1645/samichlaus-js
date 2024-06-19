@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getAbsMinuteDifference, DEPOT } from "../constants/Constants.js";
 import useTour from "../provider/Tour";
 import { updateRouteTime } from "../utils/utils.js";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 const TableComponent = ({ route, group, nameRef }) => {
   const [senior, setSenior] = useState();
   const [children, setChildren] = useState(0);
@@ -13,9 +13,9 @@ const TableComponent = ({ route, group, nameRef }) => {
     let s1 = 0;
     route.customers.forEach((c) => (s = c.children + s));
     route.customers.forEach((c) => {
-        (s1 = c.seniors + s1)
-        c.address.rayon = c.address.rayon - 1;
-        c.visitRayon = c.visitRayon - 1;
+      s1 = c.seniors + s1;
+      c.address.rayon = c.address.rayon - 1;
+      c.visitRayon = c.visitRayon - 1;
     });
     setChildren(s);
     setSenior(s1);
@@ -33,44 +33,61 @@ const TableComponent = ({ route, group, nameRef }) => {
     if (value > 300 || value < 0) return;
     if (index === -1) {
       if (route.customers.length === 0) {
-        addTime(group, index, value - getAbsMinuteDifference(
-          route.customerStart,
-          route.customerEnd
-        ));
+        addTime(
+          group,
+          index,
+          value -
+            getAbsMinuteDifference(route.customerStart, route.customerEnd),
+        );
       } else {
-        addTime(group, 0, value - getAbsMinuteDifference(
-          route.customerStart,
-          route.customers[0].visitTime
-        ));
+        addTime(
+          group,
+          0,
+          value -
+            getAbsMinuteDifference(
+              route.customerStart,
+              route.customers[0].visitTime,
+            ),
+        );
       }
     } else if (index < route.customers.length - 1)
-      addTime(group, index + 1, value - getAbsMinuteDifference(
-        route.customers[index].visitTime,
-        route.customers[index + 1].visitTime
-      ));
+      addTime(
+        group,
+        index + 1,
+        value -
+          getAbsMinuteDifference(
+            route.customers[index].visitTime,
+            route.customers[index + 1].visitTime,
+          ),
+      );
     else
-      addTime(group, -1, value - getAbsMinuteDifference(
-        route.customerEnd,
-        route.customers[index].visitTime
-      ));
+      addTime(
+        group,
+        -1,
+        value -
+          getAbsMinuteDifference(
+            route.customerEnd,
+            route.customers[index].visitTime,
+          ),
+      );
   };
 
   const handleUpdateTime = () => {
     const data = {
-        depot: DEPOT,
-        transport: route.transport,
-        startTime: route.customerStart,
-        customers: route.customers,
-        endTime: route.customerEnd,
-    }
-    updateRouteTime((res) => {
+      depot: DEPOT,
+      transport: route.transport,
+      startTime: route.customerStart,
+      customers: route.customers,
+      endTime: route.customerEnd,
+    };
+    updateRouteTime(
+      (res) => {
         const data = res.data;
         updateTime(group, data);
-    },
-    () => {},
-    data
+      },
+      () => {},
+      data,
     );
-
   };
 
   return (
@@ -82,10 +99,10 @@ const TableComponent = ({ route, group, nameRef }) => {
             <span className="font-semibold mr-2">Gruppe {group}</span>
           </div>
           <button
-              className="p-2 rounded-lg bg-primary-600 hover:bg-primary-800 text-white select-none"
-              onClick={() => handleUpdateTime()}
+            className="p-2 rounded-lg bg-primary-600 hover:bg-primary-800 text-white select-none"
+            onClick={() => handleUpdateTime()}
           >
-          Update Time
+            Update Time
           </button>
           <div className="font-semibold mr-2">
             Start Time: {route.customerStart.slice(0, 5)}
@@ -161,7 +178,7 @@ const TableComponent = ({ route, group, nameRef }) => {
               <tr>
                 <th className="border px-1">Start Time</th>
                 <th className="text-nowrap" colSpan={2}>
-                  {route.transport === "car" ? "Car" : "Laufen" }
+                  {route.transport === "car" ? "Car" : "Laufen"}
                 </th>
                 <th className=" px-1">Children</th>
                 <th className=" px-1">Seniors</th>
@@ -185,7 +202,7 @@ const TableComponent = ({ route, group, nameRef }) => {
                       route.customers.length > 0
                         ? getAbsMinuteDifference(
                             route.customers[0].visitTime,
-                            route.customerStart
+                            route.customerStart,
                           )
                         : 0
                     }
@@ -200,7 +217,13 @@ const TableComponent = ({ route, group, nameRef }) => {
                     className="text-black border-gray-300 border rounded-md px-1 mx-auto"
                     type="checkbox"
                     checked={route.transport === "car"}
-                    onChange={(e) => updateTransport(group, -1, e.target.checked ? "car" : "foot")}
+                    onChange={(e) =>
+                      updateTransport(
+                        group,
+                        -1,
+                        e.target.checked ? "car" : "foot",
+                      )
+                    }
                   />
                 </td>
               </tr>
@@ -209,12 +232,12 @@ const TableComponent = ({ route, group, nameRef }) => {
                 if (index < route.customers.length - 1)
                   value = getAbsMinuteDifference(
                     route.customers[index].visitTime,
-                    route.customers[index + 1].visitTime
+                    route.customers[index + 1].visitTime,
                   );
                 else
                   value = getAbsMinuteDifference(
                     route.customerEnd,
-                    route.customers[index].visitTime
+                    route.customers[index].visitTime,
                   );
 
                 return (
@@ -251,7 +274,13 @@ const TableComponent = ({ route, group, nameRef }) => {
                         className="text-black border-gray-300 border rounded-md px-1 mx-auto"
                         type="checkbox"
                         checked={customer.transport === "car"}
-                        onChange={(e) => updateTransport(group, index, e.target.checked ? "car" : "foot")}
+                        onChange={(e) =>
+                          updateTransport(
+                            group,
+                            index,
+                            e.target.checked ? "car" : "foot",
+                          )
+                        }
                       />
                     </td>
                   </tr>

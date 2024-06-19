@@ -4,7 +4,7 @@ import Select from "react-select";
 import { RAYON_OPTIONS, MAX_GROUPS } from "../constants/Constants";
 import useTour from "../provider/Tour";
 import { getExcel, getTour, getYears, postCalculateTour } from "../utils/utils";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 export default function Settings({ isOpen, onClose, setGroup }) {
   const modal = useRef(null);
@@ -27,7 +27,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     if (err.response) {
       if (err.response.status === 403) navigate("/logout", { replace: true });
       setError(
-        "Error (" + err.response.status + "): " + err.response.data.message
+        "Error (" + err.response.status + "): " + err.response.data.message,
       );
     } else if (err.request) {
       setError("Unexpected Error: " + err.message);
@@ -41,12 +41,12 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     if (modal.current) {
       if (isOpen) {
         setSelectedYearOption({
-            value: year,
-            label: year,
+          value: year,
+          label: year,
         });
         setRayonOption({
-            value: rayon,
-            label: "Rayon " + "I".repeat(rayon),
+          value: rayon,
+          label: "Rayon " + "I".repeat(rayon),
         });
         modal.current.showModal();
       } else {
@@ -67,8 +67,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     if (res.data && res.data.length > 0) {
       if (year && rayon && res.data.includes(year))
         handleYearRayonChange(year, rayon);
-      else
-        handleYearRayonChange(res.data[0], 1);
+      else handleYearRayonChange(res.data[0], 1);
 
       setSelectedYearOption({
         value: res.data[0],
@@ -78,7 +77,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
         options.push({
           value: year,
           label: year.toString(),
-        })
+        }),
       );
     }
     setYearOption(options);
@@ -102,9 +101,13 @@ export default function Settings({ isOpen, onClose, setGroup }) {
     postCalculateTour(
       calculateTourSuccCallback,
       errCallback,
-      { maxTimeInSeconds: maxSeconds, maxGroups: MAX_GROUPS, maxVisitTimePerGroup: 180 },
+      {
+        maxTimeInSeconds: maxSeconds,
+        maxGroups: MAX_GROUPS,
+        maxVisitTimePerGroup: 180,
+      },
       selectedYearOption.value,
-      rayonOption.value
+      rayonOption.value,
     );
   };
 
@@ -216,7 +219,7 @@ export default function Settings({ isOpen, onClose, setGroup }) {
             className="p-2 rounded-lg bg-primary-600 hover:bg-primary-800 text-white"
             onClick={() => {
               onClose();
-              navigate("/customer-mail/"+selectedYearOption.value);
+              navigate("/customer-mail/" + selectedYearOption.value);
             }}
           >
             Goto Page

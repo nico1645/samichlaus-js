@@ -72,9 +72,8 @@ export default function Home() {
         minZoom: LEAFLET_SETTINGS.minZoom,
         attribution:
           '&copy; <a href="https://www.mapbox.com">Satellite Map</a> contributors',
-      }
+      },
     );
-
 
     const baseMaps = {
       OpenStreetMap: osm,
@@ -127,7 +126,6 @@ export default function Home() {
       else g = GROUP_LIST[i];
       tour[g].customers.forEach((customer, index) => {
         const markerIcon = markerIcons[`${g}-${Math.min(index + 1, 21)}`];
-        if (markerIcon == undefined) console.log(`${g}-${Math.min(index + 1, 21)}`);
         const icon = L.icon({
           iconUrl: markerIcon.src,
           iconSize: [30, 35],
@@ -139,12 +137,12 @@ export default function Home() {
           [customer.address.latitude, customer.address.longitude],
           {
             icon: icon,
-          }
+          },
         );
         const ng = g;
         if (g !== "Z")
-          marker.on('click', () => {
-              setGroup(ng);
+          marker.on("click", () => {
+            setGroup(ng);
           });
         markers.push(marker);
         polyline.push([customer.address.latitude, customer.address.longitude]);
@@ -189,19 +187,27 @@ export default function Home() {
       Object.keys(tour).forEach((group) => {
         if (group === "Z") return;
         routes.push({
-          routeId: tour[group].routeId, 
-          transport: tour[group].transport
+          routeId: tour[group].routeId,
+          transport: tour[group].transport,
         });
         tour[group].customers.forEach((customer) => {
           customers.push({
             customerId: customer.customerId,
             visitTime: customer.visitTime,
-            transport: customer.transport
-          })
-        })
-      })
-      updateManyCustomers(() => {}, () => {}, customers);
-      updateManyRoutes(() => {}, () => {}, routes);
+            transport: customer.transport,
+          });
+        });
+      });
+      updateManyCustomers(
+        () => {},
+        () => {},
+        customers,
+      );
+      updateManyRoutes(
+        () => {},
+        () => {},
+        routes,
+      );
       setSamichlausGroupName(values);
     }
   };
@@ -209,12 +215,12 @@ export default function Home() {
   const changeEditMode = () => {
     Object.keys(tour).forEach((group) => {
       if (group === "Z") return;
-      nameRef.current[group+'samichlaus'].value = tour[group].samichlaus;
-      nameRef.current[group+'schmutzli'].value = tour[group].schmutzli;
-      nameRef.current[group+'ruprecht'].value = tour[group].ruprecht;
-      nameRef.current[group+'engel1'].value = tour[group].engel1;
-      nameRef.current[group+'engel2'].value = tour[group].engel2;
-    })
+      nameRef.current[group + "samichlaus"].value = tour[group].samichlaus;
+      nameRef.current[group + "schmutzli"].value = tour[group].schmutzli;
+      nameRef.current[group + "ruprecht"].value = tour[group].ruprecht;
+      nameRef.current[group + "engel1"].value = tour[group].engel1;
+      nameRef.current[group + "engel2"].value = tour[group].engel2;
+    });
     setIsTableMode(!isTableMode);
   };
 
@@ -225,20 +231,25 @@ export default function Home() {
   };
 
   const dragLeave = () => {
-        dragCounter.current--;
-        if (dragCounter.current === 0) {
-            setDragOverGroup("")
-        }
-  }
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setDragOverGroup("");
+    }
+  };
 
   const drop = (e) => {
-        moveItem(parseInt(e.dataTransfer.getData("fromIndex")), dragTo, e.dataTransfer.getData("fromGroup"), dragOverGroup);
-  }
+    moveItem(
+      parseInt(e.dataTransfer.getData("fromIndex")),
+      dragTo,
+      e.dataTransfer.getData("fromGroup"),
+      dragOverGroup,
+    );
+  };
 
   const dragStart = (e, fromIndex, fromGroup) => {
-        e.dataTransfer.setData("fromIndex", fromIndex);
-        e.dataTransfer.setData("fromGroup", fromGroup);
-  }
+    e.dataTransfer.setData("fromIndex", fromIndex);
+    e.dataTransfer.setData("fromGroup", fromGroup);
+  };
 
   const changeTourDate = (e) => {
     setTourDate(e.target.value);
@@ -254,10 +265,7 @@ export default function Home() {
         isOpen={isCreateCustomerOpen}
         onClose={onCloseCreateCustomer}
       />
-      <Error
-        isOpen={errorBool}
-        onClose={onCloseError}
-      />
+      <Error isOpen={errorBool} onClose={onCloseError} />
       <Settings
         isOpen={isSettingsOpen}
         onClose={onCloseSettings}
@@ -361,7 +369,7 @@ export default function Home() {
                       <span className="select-none h-20 w-20 flex items-center flex-shrink-0 justify-center text-2xl font-bold text-center cursor-default bg-gray-200 border-white dark:bg-gray-800 border-r dark:border-gray-700">
                         {tour[group].customers.length + 1}
                       </span>
-                      <div 
+                      <div
                         className="flex flex-grow  dark:bg-gray-800 items-center justify-around"
                         onDrop={(e) => drop(e)}
                         onDragOver={(e) => e.preventDefault()}
@@ -434,7 +442,12 @@ export default function Home() {
                       </div>
                     </div>
                     {tour["Z"].customers.length > 0 ? (
-                      <div onDragLeave={() => dragLeave()} onDragEnter={() => dragCounter.current++} onDragOver={(e) => e.preventDefault()} className="rounded-sm m-1 dark:bg-gray-800 bg-gray-100">
+                      <div
+                        onDragLeave={() => dragLeave()}
+                        onDragEnter={() => dragCounter.current++}
+                        onDragOver={(e) => e.preventDefault()}
+                        className="rounded-sm m-1 dark:bg-gray-800 bg-gray-100"
+                      >
                         <div className=" text-lg text-center text-nowrap">
                           Not assigned
                         </div>

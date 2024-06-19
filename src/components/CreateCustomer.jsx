@@ -3,7 +3,7 @@ import AsyncSelect from "react-select/async";
 import { useNavigate } from "react-router-dom";
 import useTour from "../provider/Tour";
 import { getAddressesContaining, postCreateCustomer } from "../utils/utils";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 export default function CreateCustomer({ isOpen, onClose, customer }) {
   const modal = useRef(null);
@@ -23,17 +23,17 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
     if (modal.current) {
       if (isOpen) {
         if (customer) {
-            setFirstName(customer.firstName);
-            setLastName(customer.lastName);
-            setChildren(customer.children);
-            setSeniors(customer.seniors);
-            setVisitYear(year);
-            setVisitRayon(customer.visitRayon);
-            setSelectedAddress({
-                value: customer.address.addressId,
-                label: customer.address.address,
-                rayon: customer.address.rayon,
-            });
+          setFirstName(customer.firstName);
+          setLastName(customer.lastName);
+          setChildren(customer.children);
+          setSeniors(customer.seniors);
+          setVisitYear(year);
+          setVisitRayon(customer.visitRayon);
+          setSelectedAddress({
+            value: customer.address.addressId,
+            label: customer.address.address,
+            rayon: customer.address.rayon,
+          });
         }
         modal.current.showModal();
       } else {
@@ -42,7 +42,6 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
-
 
   const reset = () => {
     setErrorBool(false);
@@ -60,7 +59,7 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
     if (err.response) {
       if (err.response.status === 403) navigate("/logout", { replace: true });
       setError(
-        "Error (" + err.response.status + "): " + err.response.data.message
+        "Error (" + err.response.status + "): " + err.response.data.message,
       );
     } else if (err.request) {
       setError("Unexpected Error: " + err.message);
@@ -105,7 +104,12 @@ export default function CreateCustomer({ isOpen, onClose, customer }) {
   };
 
   const loadOptions = (inputValue, callback) => {
-    getAddressesContaining(inputValue, callback, getAddressesSuccCallback, errCallback);
+    getAddressesContaining(
+      inputValue,
+      callback,
+      getAddressesSuccCallback,
+      errCallback,
+    );
   };
 
   return (

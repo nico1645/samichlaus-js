@@ -1,7 +1,6 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 export default function CardComponent({ customer }) {
-
   const getSeniorChildString = (children, seniors) => {
     if (children === 0 && seniors === 0) {
       return "0";
@@ -14,7 +13,6 @@ export default function CardComponent({ customer }) {
     }
   };
 
-
   return (
     <div className="flex-grow cursor-pointer h-[calc(5rem-4px)] m-1 select-none border border-gray-300 dark:text-white rounded-lg dark:bg-gray-900 dark:border-black shadow-sm">
       <div className="p-2 w-full whitespace-nowrap overflow-hidden">
@@ -26,7 +24,9 @@ export default function CardComponent({ customer }) {
             <p className=" text-sm pb-4">{customer.address.address}</p>
           </div>
           <div className=" flex flex-col items-center">
-                <p className=" text-md font-semibold -translate-y-4">{"I".repeat(customer.visitRayon)}</p>
+            <p className=" text-md font-semibold -translate-y-4">
+              {"I".repeat(customer.visitRayon)}
+            </p>
             <p className=" text-md">
               {getSeniorChildString(customer.children, customer.seniors)}
             </p>
@@ -38,5 +38,5 @@ export default function CardComponent({ customer }) {
 }
 
 CardComponent.propTypes = {
-    customer: PropTypes.object.isRequired,
-}
+  customer: PropTypes.object.isRequired,
+};

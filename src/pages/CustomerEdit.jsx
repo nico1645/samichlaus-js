@@ -3,7 +3,11 @@ import { useState } from "react";
 import { useEffect } from "react";
 import AsyncSelect from "react-select/async";
 import BackButton from "../components/BackButton";
-import { getAddressesContaining, getCustomer, putCustomer } from "../utils/utils";
+import {
+  getAddressesContaining,
+  getCustomer,
+  putCustomer,
+} from "../utils/utils";
 
 export default function CustomerEdit() {
   const { uuid } = useParams();
@@ -30,7 +34,7 @@ export default function CustomerEdit() {
     if (err.response) {
       if (err.response.status === 403) navigate("/logout", { replace: true });
       setError(
-        "Error (" + err.response.status + "): " + err.response.data.message
+        "Error (" + err.response.status + "): " + err.response.data.message,
       );
     } else if (err.request) {
       setError("Unexpected Error: " + err.message);
@@ -52,12 +56,9 @@ export default function CustomerEdit() {
     setSeniors(res.data.seniors);
     setVisitRayon(res.data.visitRayon);
     setVisitYear(res.data.year);
-    if (res.data.link != null)
-        setLink(res.data.link);
-    if (res.data.phone != null)
-        setPhone(res.data.phone);
-    if (res.data.email != null)
-        setEmail(res.data.email);
+    if (res.data.link != null) setLink(res.data.link);
+    if (res.data.phone != null) setPhone(res.data.phone);
+    if (res.data.email != null) setEmail(res.data.email);
     setVisitTime(res.data.visitTime);
   };
 
@@ -81,7 +82,12 @@ export default function CustomerEdit() {
       email: email,
       visitTime: visitTime,
     };
-    putCustomer(() => navigate("/", { replace: true }), errCallback, data, uuid);
+    putCustomer(
+      () => navigate("/", { replace: true }),
+      errCallback,
+      data,
+      uuid,
+    );
   };
 
   const getAddressesSuccCallback = (res, callback) => {
@@ -103,7 +109,7 @@ export default function CustomerEdit() {
       inputValue,
       callback,
       getAddressesSuccCallback,
-      errCallback
+      errCallback,
     );
   };
 

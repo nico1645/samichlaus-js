@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createContext, useMemo, useReducer } from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 // Create the authentication context
 export const AuthContext = createContext();
@@ -35,13 +35,14 @@ const authReducer = (state, action) => {
 
     default:
       console.error(
-        `You passed an action.type: ${action.type} which doesn't exist`
+        `You passed an action.type: ${action.type} which doesn't exist`,
       );
   }
 };
 
 if (localStorage.getItem("token"))
-  axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
+  axios.defaults.headers.common["Authorization"] =
+    "Bearer " + localStorage.getItem("token");
 
 // Initial state for the authentication context
 const initialData = {
@@ -52,7 +53,7 @@ const initialData = {
 const AuthProvider = ({ children }) => {
   // Use reducer to manage the authentication state
   const [state, dispatch] = useReducer(authReducer, initialData);
-  
+
   const setToken = (newToken) => {
     dispatch({ type: ACTIONS.setToken, payload: newToken });
   };
@@ -68,7 +69,7 @@ const AuthProvider = ({ children }) => {
       setToken,
       clearToken,
     }),
-    [state]
+    [state],
   );
 
   return (
@@ -77,7 +78,7 @@ const AuthProvider = ({ children }) => {
 };
 
 AuthProvider.propTypes = {
-    children: PropTypes.node.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default AuthProvider;

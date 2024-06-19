@@ -30,7 +30,7 @@ export default function Signup() {
             headers: {
               "Content-Type": "application/json",
             },
-          }
+          },
         )
         .then((res) => {
           setErrorBool(false);
@@ -43,7 +43,7 @@ export default function Signup() {
               "Error (" +
                 err.response.status +
                 "): " +
-                err.response.data.message
+                err.response.data.message,
             );
           } else if (err.request) {
             setError("Unexpected Error: " + err.message);

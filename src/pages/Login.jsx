@@ -24,7 +24,7 @@ export default function Login() {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       )
       .then((res) => {
         setErrorBool(false);
@@ -34,7 +34,7 @@ export default function Login() {
       .catch((err) => {
         if (err.response) {
           setError(
-            "Error (" + err.response.status + "): " + err.response.data.message
+            "Error (" + err.response.status + "): " + err.response.data.message,
           );
         } else if (err.request) {
           setError("Unexpected Error: " + err.message);

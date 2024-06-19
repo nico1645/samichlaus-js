@@ -4,16 +4,16 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { lazy } from "react";
 import Login from "../pages/Login";
 
-const Error = lazy(() => import('../pages/Error.jsx'));
-const Logout = lazy(() => import('../pages/Logout.jsx'));
-const Signup = lazy(() => import('../pages/Signup.jsx'));
-const Home = lazy(() => import('../pages/Home.jsx'));
-const Address = lazy(() => import('../pages/Address.jsx'));
-const Customer = lazy(() => import('../pages/Customer.jsx'));
-const CustomerEdit = lazy(() => import('../pages/CustomerEdit.jsx'));
-const Search = lazy(() => import('../pages/Search.jsx'));
-const Mail = lazy(() => import('../pages/Mail.jsx'));
-const TourProvider = lazy(() => import('../provider/TourProvider.jsx'));
+const Error = lazy(() => import("../pages/Error.jsx"));
+const Logout = lazy(() => import("../pages/Logout.jsx"));
+const Signup = lazy(() => import("../pages/Signup.jsx"));
+const Home = lazy(() => import("../pages/Home.jsx"));
+const Address = lazy(() => import("../pages/Address.jsx"));
+const Customer = lazy(() => import("../pages/Customer.jsx"));
+const CustomerEdit = lazy(() => import("../pages/CustomerEdit.jsx"));
+const Search = lazy(() => import("../pages/Search.jsx"));
+const Mail = lazy(() => import("../pages/Mail.jsx"));
+const TourProvider = lazy(() => import("../provider/TourProvider.jsx"));
 
 const Routes = () => {
   const { token } = useAuth();
@@ -59,11 +59,11 @@ const Routes = () => {
             <TourProvider>
               <Search />
             </TourProvider>
-            ),
+          ),
         },
         {
           path: "/customer-mail/:year",
-          element: <Mail />
+          element: <Mail />,
         },
         {
           path: "/logout",

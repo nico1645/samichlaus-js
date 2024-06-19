@@ -23,7 +23,7 @@ export default function Address() {
             headers: {
               "Content-Type": "multipart/form-data",
             },
-          }
+          },
         )
         .then(() => {
           navigate("/", { replace: true });
@@ -36,7 +36,7 @@ export default function Address() {
               "Error (" +
                 err.response.status +
                 "): " +
-                err.response.data.message
+                err.response.data.message,
             );
           } else if (err.request) {
             setError("Unexpected Error: " + err.message);
