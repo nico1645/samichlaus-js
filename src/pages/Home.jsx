@@ -433,7 +433,6 @@ export default function Home() {
                           <input
                             className="dark:text-black border border-black rounded-md"
                             name="visit-time"
-                            onKeyDown={(e) => e.preventDefault()}
                             type="time"
                             value={tour[group].customerStart.slice(0, 5)}
                             onChange={(e) => changeGroupStartTime(e)}

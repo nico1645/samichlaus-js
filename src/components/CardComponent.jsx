@@ -23,7 +23,7 @@ export default function CardComponent({ customer, index, group, dropItem }) {
       <div className="p-2 w-full whitespace-nowrap overflow-hidden">
         <div className="flex items-center justify-between gap-2">
           <div className=" overflow-clip flex-grow">
-            <h2 className="text-lg pt-2 text-nowrap truncate">
+            <h2 className="text-lg pt-2 text-nowrap truncate max-w-64">
               {customer.firstName + " " + customer.lastName}
             </h2>
             <p className=" text-sm pb-4 text-nowrap truncate">
