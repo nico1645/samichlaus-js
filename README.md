@@ -25,7 +25,7 @@ Make sure you have a working installation of [nodejs](https://nodejs.org/en/down
 
 Clone the github repo and enter the root directory.
 ```bash
-git clone
+git clone https://github.com/nico1645/samichlaus-js.git
 cd ./samichlaus-js
 ```
 Install the npm packages with yarn.
