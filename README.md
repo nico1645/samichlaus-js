@@ -1,6 +1,6 @@
 # Samichlaus Creator Frontend
 
-Single Page React App for creating and managing short round trips for multiple Groups with Customers. Created for the non-profit organization [Samichlaus-Vereinigung Hergiswil](https://www.samichlaushergiswil.ch/) as a side-project of mine. It works with the [Samichlaus Creator Backend]().
+Single Page React App for creating and managing short round trips for multiple Groups with Customers. Created for the non-profit organization [Samichlaus-Vereinigung Hergiswil](https://www.samichlaushergiswil.ch/) as a side-project of mine. It works with the [Samichlaus Creator Backend](https://github.com/nico1645/samichlaus-spring).
 
 ## Description
 
@@ -9,7 +9,7 @@ The image is the main page after a successful login. The sidebar is used for nav
 
 ### Technologies used
 
-- *JavaScript*
+- **JavaScript**
 - [React](https://react.dev/)
 - [Vite](https://vitejs.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
@@ -24,27 +24,36 @@ Make sure you have a working installation of [nodejs](https://nodejs.org/en/down
 ### Installing
 
 Clone the github repo and enter the root directory.
-```git clone ```
+```bash
+git clone
+cd ./samichlaus-js
+```
 Install the npm packages with yarn.
-```yarn install```
-Make sure to change the environment variables an example is given in [.env.EXAMPLE]. For development create a *.env.development* file and for production create a *.env.production* file in the root with the ENV variables.
+```
+yarn install
+```
+Make sure to change the environment variables an example is given in [.env.EXAMPLE](./.env.EXAMPLE). For development create a **.env.development** file and for production create a **.env.production** file in the root with the ENV variables.
 
 ### Running/Building server
 
 Start dev server by running.
-```yarn dev```
+```
+yarn dev
+```
 Building for production with.
-```yarn build```
+```
+yarn build
+```
 
 ## Version History
 
 * 0.2.0 (main branch)
     * Sending Emails with the visit time to Customers
     * Bug fixes and other small improvements
-    * See [release history]()
+    * See [release tags](https://github.com/nico1645/samichlaus-js/tags)
 * 0.1.x
     * Initial Release
-    * See [release branch]()
+    * See [release branch](https://github.com/nico1645/samichlaus-js/tree/0.1.x)
 
 ## Authors
 
