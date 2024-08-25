@@ -119,8 +119,8 @@ export default function Search() {
         customer={customer}
       />
       <BackButton />
-      <div className="py-4 px-4 mx-20 w-full h-[90%] rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700 lg:px-6">
-        <div className="h-24 mb-2 flex flex-row justify-center items-center gap-2">
+      <div className="py-4 px-4 mx-2 md:mx-20 w-full h-[90%] rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700 lg:px-6">
+        <div className="md:h-24 mb-2 flex md:flex-row flex-col justify-center items-center gap-2">
           <Select
             className="text-black w-26"
             value={selectedYearOption}
@@ -130,7 +130,7 @@ export default function Search() {
             options={yearOption}
           />
           <input
-            className="h-9 p-2 text-black rounded-md border border-gray-300"
+            className="h-9 p-2 min-w-6 text-black rounded-md border border-gray-300"
             placeholder="Search"
             onChange={filterCustomers}
           />
@@ -157,7 +157,7 @@ export default function Search() {
             {error}
           </div>
         ) : null}
-        <div className="overflow-y-auto h-[90%]">
+        <div className="overflow-y-auto md:h-[90%] h-[79%]">
           <div className="t-6 flex flex-wrap gap-4 justify-center">
             {filteredCustomers.map((customer, index) => {
               return (

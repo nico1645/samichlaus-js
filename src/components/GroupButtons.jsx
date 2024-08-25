@@ -87,7 +87,7 @@ export default function GroupButtons({ group, setGroup, moveItem }) {
   };
 
   return (
-    <div className="flex flex-row gap-2 items-center justify-center mt-2 max-w-full overflow-auto">
+    <div className="flex flex-row gap-2 items-center justify-center mt-2 overflow-auto">
       {Object.keys(tour).map((val) => {
         const color = COLOR_DICT[val];
         if (val !== "Z")
